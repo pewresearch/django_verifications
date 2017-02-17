@@ -1,0 +1,35 @@
+{% extends "_template.html" %}
+
+{% load staticfiles %}
+
+{% block extra_head %}{% endblock %}
+
+{% block modals %}{% endblock %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Verification Tasks</h3>
+                </div>
+                <table class="panel-body table table-condensed">
+                    <tr><th>Model</th><th>Complete</th><th>Need Review</th><th>Unverified</th><th></th></tr>
+                    {% for model in verification_models %}
+                        <tr>
+                            <td>{{ model.name }}</td>
+                            <td>{{ model.good }}</td>
+                            <td>{{ model.bad }}</td>
+                            <td>{{ model.incomplete }}</td>
+                            <td>{% if model.incomplete > 0 %}<a class="btn btn-primary" href="/verifications/verify/{{ model.name }}">Start Coding</a>{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_body %}{% endblock %}

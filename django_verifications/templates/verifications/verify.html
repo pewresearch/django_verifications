@@ -1,0 +1,84 @@
+{% extends "_template.html" %}
+
+{% load staticfiles %}
+
+{% block extra_head %}{% endblock %}
+
+{% block modals %}{% endblock %}
+
+{% block body %}
+
+    <h3>Verification: {{ model_name }} {{ pk }} {% if prev_id %}<a href="/verifications/verify/{{ model_name }}/{{ prev_id }}">Go back</a>{% endif %}</h3>
+    <form name='mturk_form' method='post' id='form' action='/verifications/verify/{{ model_name }}'>
+        {% csrf_token %}
+        <input type="hidden" name="pk" value="{{ pk }}">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="panel panel-default">
+                    <div class="panel-body" style="overflow: scroll; height: 450px;">
+                        {% for k, v in verification_metadata_fields %}
+                            <p><b>{{ k }}:</b> {{ v }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-7">
+                {% for k, v, existing_value, note in fields_to_verify %}
+                    <div class="panel panel-default">
+                        <table class="panel-body table table-condensed">
+
+                            <tr><td class="form-group col-md-4">{{ k }}</td><td class="form-group col-md-8">{{ v }}</td></tr>
+
+                            <tr><td class="form-group col-md-4">Correct?</td><td class="form-group col-md-8">
+                                <label class="radio-inline">
+                                    <input class="zoom" type="radio" name="{{ k }}" value="True" {% if existing_value == '1' %}checked{% else %}{% endif %}>
+                                    Correct
+                                </label>
+                                <label class="radio-inline">
+                                    <input class="zoom" type="radio" name="{{ k }}" value="False" {% if existing_value == '0' %}checked{% else %}{% endif %}>
+                                    Incorrect / Needs Review
+                                </label>
+                            </td></tr>
+
+                            <tr><td class="form-group col-md-4">Notes</td><td class="form-group col-md-8">
+                                <fieldset class="form-group">
+                                    <textarea id="{{ k }}_notes" name="{{ k }}_notes" value="{{ note }}" class="form-control" rows="3" placeholder="Notes">{{ note }}</textarea>
+                                </fieldset>
+                            </td></tr>
+
+                        </table>
+                </div>
+                {% endfor %}
+                <div class="panel panel-default">
+                    <table class="panel-body table table-condensed">
+                        <tr><td colspan="2"><button class="btn btn-primary btn-block" type="button" data-toggle="modal" data-target="#confirm_modal">Submit</button></td></tr>
+                        <tr><td colspan="2"><a class="btn btn-danger btn-block" type="button" href="/verifications/verify/{{ model_name }}">Skip</a></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="confirm_modal" tabindex="-1" role="dialog">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Confirm submission</h4>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you're ready to submit?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Go back</button>
+                <button type="submit" id="submitButton" class="btn btn-primary">Submit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </form>
+
+{% endblock %}
+
+{% block extra_body %}{% endblock %}
