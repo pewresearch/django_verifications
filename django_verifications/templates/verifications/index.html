@@ -21,8 +21,8 @@
                             <td>{{ model.name }}</td>
                             <td>{{ model.good }}</td>
                             <td>{{ model.bad }}</td>
-                            <td>{{ model.incomplete }}</td>
-                            <td>{% if model.incomplete > 0 %}<a class="btn btn-primary" href="/verifications/verify/{{ model.name }}">Start Coding</a>{% endif %}</td>
+                            <td>{{ model.unverified }}</td>
+                            <td>{% if model.unverified > 0 %}<a class="btn btn-primary" href="/verifications/verify/{{ model.name }}">Start Coding</a>{% endif %}</td>
                         </tr>
                     {% endfor %}
                 </table>
