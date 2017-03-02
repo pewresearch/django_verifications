@@ -10,13 +10,12 @@ from pewtils.django import get_model
 from pewtils.nlp import decode_text
 from pewtils.io import FileHandler
 
-from django_verifications.utils import get_verification_model
+from django_verifications.models import Verification
 
 
 @login_required
 def home(request):
 
-    Verification = get_verification_model()
     verification_models = []
     for model_name in Verification.objects.available_model_names():
         good = Verification.objects.good_objects(model_name).count()
@@ -37,8 +36,9 @@ def home(request):
 @login_required
 def verify(request, model_name, pk=None):
 
+    model_name = model_name.replace(" ", "_")
+
     model = get_model(model_name, app_name=settings.SITE_NAME)
-    Verification = get_verification_model()
 
     prev_id = None
     if request.method == "POST":
@@ -47,7 +47,7 @@ def verify(request, model_name, pk=None):
         obj = model.objects.get(pk=prev_id)
         for field in model._meta.fields_to_verify:
             v = Verification.objects.create_or_update(
-                {"user": request.user, "field": field, "{}_id".format(model_name): obj.pk},
+                {"user": request.user, "field": field, "content_object": obj},
                 {"timestamp": datetime.datetime.now(), "is_good": eval(request.POST.get(field)), "notes": request.POST.get("{}_notes".format(field))},
                 save_nulls=True
             )
@@ -67,7 +67,7 @@ def verify(request, model_name, pk=None):
         obj_data = {"fields_to_verify": [], "verification_metadata_fields": [], "pk": new_obj.pk, "model_name": model_name}
         for field in model._meta.fields_to_verify:
             existing_verifications = Verification.objects\
-                .filter(**{"{}_id".format(model_name): new_obj.pk})\
+                .filter(**{model_name: new_obj})\
                 .filter(user=request.user)\
                 .filter(field=field)\
                 .order_by("-timestamp")
@@ -76,6 +76,8 @@ def verify(request, model_name, pk=None):
             if existing_verifications.count() > 0:
                 note = existing_verifications[0].notes
                 existing_value =  str(int(existing_verifications[0].is_good)) if is_not_null(existing_verifications[0].is_good) else None
+            # TODO: this is logos-specific functionality and needs to be removed
+            # maybe you allow for a custom function like _get_verification_metadata on the model that can get called
             if field == "politician":
                 latest_term = getattr(new_obj, field).latest_term
                 if not latest_term:

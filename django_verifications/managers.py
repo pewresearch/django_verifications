@@ -1,6 +1,7 @@
 import pandas
 
 from django.conf import settings
+from django.apps import apps
 
 from pewtils.django import get_model
 
@@ -9,15 +10,7 @@ from django_verifications.settings import VERIFICATION_FIELDS, VERIFICATION_BASE
 
 class VerifiedModelManager(VERIFICATION_BASE_MANAGER):
 
-    def verifiable(self):
-
-        verifiable = self.all()
-        for filter in self.model._meta.verification_filters:
-            verifiable = verifiable.filter(**filter)
-
-        return verifiable
-
-    def verified_all(self):
+    def verified(self):
 
         df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good"))
         df = df[~df['verifications__field'].isnull()]
@@ -60,22 +53,32 @@ class VerifiedModelManager(VERIFICATION_BASE_MANAGER):
 
     def unverified(self):
 
-        return self.verifiable().exclude(pk__in=self.verified_all())
+        return self.verifiable().exclude(pk__in=self.verified())
 
 
-class VerificationModelManager(VERIFICATION_BASE_MANAGER):
+class VerificationManager(VERIFICATION_BASE_MANAGER):
 
     def available_model_names(self):
 
         verification_model_names = []
-        for field in self.model._meta.fields:
-            if "ForeignKey" in str(type(field)) and "user" not in str(field):
-                verification_model_names.append(field.name)
+        for app, model_list in apps.all_models.iteritems():
+            for model_name, model in model_list.iteritems():
+                if model.__base__.__name__ == "VerifiedModel":
+                    verification_model_names.append(model._meta.verbose_name)
         return verification_model_names
 
     def filter_by_model_name(self, model_name):
 
         return self.filter(**{"{}__isnull".format(model_name): False})
+
+    def verified_objects(self, model_name):
+
+        model = get_model(model_name, app_name=settings.SITE_NAME)
+        return model.objects.verified()
+
+    def verified(self, model_name):
+
+        return self.filter(**{"{}_id__in".format(model_name): self.verified_objects(model_name).values_list("pk", flat=True)})
 
     def good_objects(self, model_name):
 
@@ -98,7 +101,7 @@ class VerificationModelManager(VERIFICATION_BASE_MANAGER):
     def verifiable_objects(self, model_name):
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
-        return model.objects.verified()
+        return model.objects.verifiable()
 
     def unverified_objects(self, model_name):
 

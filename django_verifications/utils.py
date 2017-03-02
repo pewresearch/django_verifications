@@ -1,18 +1,29 @@
+import pandas, re
+
 from django.apps import apps
 
-from django_verifications.models import VerificationModel
+from pewtils.django import get_model
+
+from django_verifications.models import Verification
 
 
-def get_verification_model():
+def get_verification_dataframe(model_name):
 
-    verification_models = []
-    for app, model_list in apps.all_models.iteritems():
-        for model_name, model in model_list.iteritems():
-            if model.__base__ == VerificationModel:
-                verification_models.append(model)
+    model = get_model(model_name)
+    verified_objects = Verification.objects.verified_objects()
+    verifications = Verification.objects.verified()
 
-    if len(verification_models) == 1:
-        return verification_models[0]
-    else:
-        raise Exception("You need one and only one verification model, we found: {}".format(verification_models))
+    verif_fields = ["pk", model_name, "field", "user", "timestamp", "is_good", "notes"]
+    verifications = pandas.DataFrame.from_records(verifications.values(*verif_fields))
 
+    obj_fields = ["pk"] + \
+                 model._meta.verification_metadata_fields + \
+                 model._meta.fields_to_verify
+    verified_objects = pandas.DataFrame.from_records(verified_objects.values(*obj_fields))
+
+    verifications = verifications.merge(verified_objects, how="left", left_on="{}_id".format(model_name), right_on="pk", suffixes=('', '_obj'))
+    verifications["field_value"] = verifications.apply(lambda x: x["{}_obj".format(x["field"])], axis=1)
+    for f in model._meta.verification_metadata_fields:
+        del verifications["{}_obj".format(f)]
+
+    return verifications
