@@ -13,13 +13,13 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 from django.db import models
 
-VERIFICATION_FIELDS = ('enable_verification', 'fields_to_verify', 'verification_metadata_fields', 'verification_filters')
-models.options.DEFAULT_NAMES += VERIFICATION_FIELDS
+DJANGO_VERIFICATIONS_FIELDS = ('enable_verification', 'fields_to_verify', 'verification_metadata_fields', 'verification_filters')
+models.options.DEFAULT_NAMES += DJANGO_VERIFICATIONS_FIELDS
 
-if not getattr(settings, 'VERIFICATION_BASE_MODEL', None):
-    VERIFICATION_BASE_MODEL = models.Model
-if not getattr(settings, 'VERIFICATION_BASE_MANAGER', None):
+if not getattr(settings, 'DJANGO_VERIFICATIONS_BASE_MODEL', None):
+    DJANGO_VERIFICATIONS_BASE_MODEL = models.Model
+if not getattr(settings, 'DJANGO_VERIFICATIONS_MANAGER', None):
     from pewtils.django.managers import BasicManager
-    VERIFICATION_BASE_MANAGER = BasicManager
-    #VERIFICATION_BASE_MANAGER = models.QuerySet
+    DJANGO_VERIFICATIONS_BASE_MANAGER = BasicManager
+    #DJANGO_VERIFICATIONS_BASE_MANAGER = models.QuerySet
 
