@@ -13,7 +13,7 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 from django.db import models
 
-DJANGO_VERIFICATIONS_FIELDS = ('enable_verification', 'fields_to_verify', 'verification_metadata_fields', 'verification_filters')
+DJANGO_VERIFICATIONS_FIELDS = ('fields_to_verify', 'verification_metadata_fields', 'verification_filters')
 models.options.DEFAULT_NAMES += DJANGO_VERIFICATIONS_FIELDS
 
 if not getattr(settings, 'DJANGO_VERIFICATIONS_BASE_MODEL', None):
