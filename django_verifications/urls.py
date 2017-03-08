@@ -1,9 +1,11 @@
-from django.conf.urls import patterns
+from django.conf.urls import url
 
-urlpatterns = patterns('', )
+from django_verifications import views
 
-urlpatterns += patterns('django_verifications.views',
-    (r'^verify$', 'home'),
-    (r'^verify/(?P<model_name>.+)/(?P<pk>[0-9]+)$', 'verify'),
-    (r'^verify/(?P<model_name>.+)$', 'verify'),
-)
+
+app_name = 'django_verifications'
+urlpatterns = [
+    url(r'^$', views.home, name="home"),
+    url(r'^(?P<model_name>.+)/(?P<pk>[0-9]+)$', views.verify, name="verify"),
+    url(r'^(?P<model_name>.+)$', views.verify, name="verify"),
+]

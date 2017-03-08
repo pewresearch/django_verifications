@@ -1,4 +1,4 @@
-{% extends "_template.html" %}
+{% extends "django_verifications/_template.html" %}
 
 {% load staticfiles %}
 
@@ -8,8 +8,8 @@
 
 {% block body %}
 
-    <h3>Verification: {{ model_name }} {{ pk }} {% if prev_id %}<a href="/verifications/verify/{{ model_name }}/{{ prev_id }}">Go back</a>{% endif %}</h3>
-    <form name='mturk_form' method='post' id='form' action='/verifications/verify/{{ model_name }}'>
+    <h3>Verification: {{ model_name }} {{ pk }} {% if prev_id %}<a href="{% url 'django_verifications:verify' model_name prev_id %}">Go back</a>{% endif %}</h3>
+    <form name='mturk_form' method='post' id='form' action="{% url 'django_verifications:verify' model_name %}">
         {% csrf_token %}
         <input type="hidden" name="pk" value="{{ pk }}">
         <div class="row">
@@ -53,7 +53,7 @@
                 <div class="panel panel-default">
                     <table class="panel-body table table-condensed">
                         <tr><td colspan="2"><button class="btn btn-primary btn-block" type="button" data-toggle="modal" data-target="#confirm_modal">Submit</button></td></tr>
-                        <tr><td colspan="2"><a class="btn btn-danger btn-block" type="button" href="/verifications/verify/{{ model_name }}">Skip</a></td></tr>
+                        <tr><td colspan="2"><a class="btn btn-danger btn-block" type="button" href="{% url 'django_verifications:verify' model_name %}">Skip</a></td></tr>
                     </table>
                 </div>
             </div>

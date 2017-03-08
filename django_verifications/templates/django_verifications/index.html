@@ -1,4 +1,4 @@
-{% extends "_template.html" %}
+{% extends "django_verifications/_template.html" %}
 
 {% load staticfiles %}
 
@@ -22,7 +22,7 @@
                             <td>{{ model.good }}</td>
                             <td>{{ model.bad }}</td>
                             <td>{{ model.unverified }}</td>
-                            <td>{% if model.unverified > 0 %}<a class="btn btn-primary" href="/verifications/verify/{{ model.name }}">Start Coding</a>{% endif %}</td>
+                            <td>{% if model.unverified > 0 %}<a class="btn btn-primary" href="{% url 'django_verifications:verify' model.name %}">Start Coding</a>{% endif %}</td>
                         </tr>
                     {% endfor %}
                 </table>

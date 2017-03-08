@@ -17,9 +17,26 @@ DJANGO_VERIFICATIONS_FIELDS = ('enable_verification', 'fields_to_verify', 'verif
 models.options.DEFAULT_NAMES += DJANGO_VERIFICATIONS_FIELDS
 
 if not getattr(settings, 'DJANGO_VERIFICATIONS_BASE_MODEL', None):
-    DJANGO_VERIFICATIONS_BASE_MODEL = models.Model
+    # DJANGO_VERIFICATIONS_BASE_MODEL = models.Model
+    from pewtils.django.abstract_models import BasicExtendedModel
+    DJANGO_VERIFICATIONS_BASE_MODEL = BasicExtendedModel
 if not getattr(settings, 'DJANGO_VERIFICATIONS_MANAGER', None):
     from pewtils.django.managers import BasicManager
     DJANGO_VERIFICATIONS_BASE_MANAGER = BasicManager
     #DJANGO_VERIFICATIONS_BASE_MANAGER = models.QuerySet
 
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages'
+            ]
+        }
+    }
+]

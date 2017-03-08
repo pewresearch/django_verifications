@@ -1,6 +1,6 @@
 import datetime
 
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
@@ -27,10 +27,10 @@ def home(request):
             "bad": bad,
             "unverified": unverified
         })
-    print verification_models
-    return render_to_response('verifications/index.html', {
+
+    return render(request, 'django_verifications/index.html', {
         "verification_models": verification_models
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -107,8 +107,7 @@ def verify(request, model_name, pk=None):
 
         obj_data["prev_id"] = prev_id
 
-        return render_to_response('verifications/verify.html', obj_data,
-                                  context_instance=RequestContext(request))
+        return render(request, 'django_verifications/verify.html', obj_data)
 
     else:
 
