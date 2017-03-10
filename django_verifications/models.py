@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from django_verifications.settings import DJANGO_VERIFICATIONS_FIELDS, DJANGO_VERIFICATIONS_BASE_MODEL, DJANGO_VERIFICATIONS_BASE_MANAGER
+from django_verifications.settings import DJANGO_VERIFICATIONS_FIELDS, DJANGO_VERIFICATIONS_BASE_MODEL
 from django_verifications.managers import VerificationManager, VerifiedModelManager
 
 

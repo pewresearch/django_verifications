@@ -4,17 +4,17 @@ import os
 from django.conf import settings
 from django.db import models
 
+from pewtils.django.abstract_models import BasicExtendedModel
+from pewtils.django.managers import BasicExtendedManager
+
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 DJANGO_VERIFICATIONS_FIELDS = ('fields_to_verify', 'verification_metadata_fields', 'verification_filters')
 models.options.DEFAULT_NAMES += DJANGO_VERIFICATIONS_FIELDS
 
-from pewtils.django.managers import BasicManager
-from pewtils.django.abstract_models import BasicExtendedModel
-
 for setting, default in [
     ("DJANGO_VERIFICATIONS_BASE_MODEL", BasicExtendedModel),
-    ("DJANGO_VERIFICATIONS_BASE_MANAGER", BasicManager)
+    ("DJANGO_VERIFICATIONS_BASE_MANAGER", BasicExtendedManager)
 ]:
     if not getattr(settings, setting, None):
         globals()[setting] = default
