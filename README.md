@@ -69,3 +69,7 @@ and run migrations:
 $ python manage.py makemigrations
 $ python manage.py migrate
 ```
+
+# TODO: explain the templates/views
+# TODO: explain the manager functions
+# TODO: explain the VerifiedModel save override
