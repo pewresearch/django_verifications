@@ -4,11 +4,10 @@ from django.conf import settings
 from django.apps import apps
 
 from pewtils.django import get_model
+from pewtils.django.managers import BasicExtendedManager
 
-from django_verifications.settings import DJANGO_VERIFICATIONS_FIELDS, DJANGO_VERIFICATIONS_BASE_MODEL, DJANGO_VERIFICATIONS_BASE_MANAGER
 
-
-class VerifiedModelManager(DJANGO_VERIFICATIONS_BASE_MANAGER):
+class VerifiedModelManager(BasicExtendedManager):
 
     def verified(self):
 
@@ -56,7 +55,7 @@ class VerifiedModelManager(DJANGO_VERIFICATIONS_BASE_MANAGER):
         return self.verifiable().exclude(pk__in=self.verified())
 
 
-class VerificationManager(DJANGO_VERIFICATIONS_BASE_MANAGER):
+class VerificationManager(BasicExtendedManager):
 
     def available_model_names(self):
 

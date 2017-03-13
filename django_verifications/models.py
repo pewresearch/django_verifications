@@ -8,12 +8,12 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from django_verifications.settings import DJANGO_VERIFICATIONS_FIELDS, DJANGO_VERIFICATIONS_BASE_MODEL
+from pewtils.django.abstract_models import BasicExtendedModel
+
 from django_verifications.managers import VerificationManager, VerifiedModelManager
 
 
-
-class VerifiedModel(DJANGO_VERIFICATIONS_BASE_MODEL):
+class VerifiedModel(BasicExtendedModel):
 
     objects = VerifiedModelManager().as_manager()
 
@@ -54,7 +54,7 @@ class VerifiedModel(DJANGO_VERIFICATIONS_BASE_MODEL):
         super(VerifiedModel, self).save(*args, **kwargs)
 
 
-class Verification(DJANGO_VERIFICATIONS_BASE_MODEL):
+class Verification(BasicExtendedModel):
 
     field = models.CharField(max_length=150)
     user = models.ForeignKey(User, related_name="verifications")
