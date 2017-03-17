@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'django_verifications',
-    version = '0.0.1',
+    version = '0.0.2',
     description = 'Lightweight coding interface to manually review and freeze various model attributes using simple metadata toggles',
     long_description = 'http://labs.pewresearch.tech/docs/libs/django_verifications',
     url = 'https://github.com/pewresearch/django_verifications',
@@ -14,6 +14,7 @@ setup(
         'pandas'
     ],
     packages = find_packages(exclude = ['contrib', 'docs', 'tests']),
+    include_package_data=True,
     classifiers = [
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 1 - Planning',
