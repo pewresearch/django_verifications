@@ -1,4 +1,4 @@
 include README.md
 include requirements.txt
-recursive-inside django_verifications/templates *
+recursive-include django_verifications/templates *
 recursive-exclude django_verifications *.pyc
