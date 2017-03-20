@@ -13,6 +13,8 @@ for setting, default in [
 ]:
     if not getattr(settings, setting, None):
         globals()[setting] = default
+    else:
+        globals()[setting] = getattr(settings, setting)
 
 TEMPLATES = [
     {
