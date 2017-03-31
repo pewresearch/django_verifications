@@ -64,7 +64,7 @@ def verify(request, model_name, pk=None):
 
     if new_obj:
 
-        obj_data = {"fields_to_verify": [], "verification_metadata_fields": [], "pk": new_obj.pk, "model_name": model_name}
+        obj_data = {"fields_to_verify": [], "pk": new_obj.pk, "model_name": model_name}
         for field in model._meta.fields_to_verify:
             existing_verifications = Verification.objects\
                 .filter(**{model_name: new_obj})\
@@ -76,38 +76,74 @@ def verify(request, model_name, pk=None):
             if existing_verifications.count() > 0:
                 note = existing_verifications[0].notes
                 existing_value =  str(int(existing_verifications[0].is_good)) if is_not_null(existing_verifications[0].is_good) else None
-            # TODO: this is logos-specific functionality and needs to be removed
-            # maybe you allow for a custom function like _get_verification_metadata on the model that can get called
-            if field == "politician":
-                latest_term = getattr(new_obj, field).latest_term
-                if not latest_term:
-                    campaigns = getattr(new_obj, field).campaigns.order_by("-election__year")
-                    if campaigns.count() > 0:
-                        pol_text = " --- latest campaign: {}".format(str(campaigns[0]))
-                    else:
-                        pol_text = " --- NO TERMS OR CAMPAIGNS FOUND"
-                else:
-                    pol_text = " --- latest term: {}".format(str(latest_term))
-                obj_data["fields_to_verify"].append(
-                    (
-                        field,
-                        decode_text(getattr(new_obj, field)) + pol_text,
-                        existing_value,
-                        note
-                    )
-                )
-            else:
-                obj_data["fields_to_verify"].append((field, decode_text(getattr(new_obj, field)), existing_value, note))
 
-        values = model.objects.filter(pk=new_obj.pk).values(*model._meta.verification_metadata_fields)[0]
-        for field in model._meta.verification_metadata_fields:
-            try: better_val = decode_text(getattr(new_obj, field))
-            except: better_val = decode_text(values.get(field, None))
-            obj_data["verification_metadata_fields"].append((field, better_val))
+            obj_data["fields_to_verify"].append((field, decode_text(getattr(new_obj, field)), existing_value, note))
+
+        obj_data["verification_metadata"] = new_obj.get_verification_metadata()
 
         obj_data["prev_id"] = prev_id
 
         return render(request, 'django_verifications/verify.html', obj_data)
+
+    else:
+
+        return home(request)
+
+
+@login_required
+def correct(request, model_name, pk=None):
+
+    model_name = model_name.replace(" ", "_")
+
+    model = get_model(model_name, app_name=settings.SITE_NAME)
+
+    prev_id = None
+    if request.method == "POST":
+
+        prev_id = request.POST.get("pk")
+        obj = model.objects.get(pk=prev_id)
+        for field in model._meta.fields_to_verify:
+            raise Exception("Feature not yet implemented")
+            # v = Verification.objects.get_if_exists({"user": request.user, "field": field, "content_object": obj})
+            # if not v.is_good:
+            #     setattr(obj, field, request.POST.get(field))
+            #     obj.save()
+            #     v.timestamp = datetime.datetime.now()
+            #     v.is_good = True
+            #     v.save()
+            #     print "Saving {}, {}: {} ({})".format(obj, field, v.is_good, v.pk)
+
+    if not pk:
+        bad = Verification.objects.bad_objects(model_name)
+        if bad.count() > 0:
+            new_obj = bad.order_by("?")[0]
+        else:
+            new_obj = None
+    else:
+        new_obj = model.objects.get(pk=pk)
+
+    if new_obj:
+
+        obj_data = {"fields_to_verify": [], "pk": new_obj.pk, "model_name": model_name}
+        for field in model._meta.fields_to_verify:
+            existing_verifications = Verification.objects\
+                .filter(**{model_name: new_obj})\
+                .filter(user=request.user)\
+                .filter(field=field)\
+                .order_by("-timestamp")
+            note = ""
+            existing_value = None
+            if existing_verifications.count() > 0:
+                note = existing_verifications[0].notes
+                existing_value =  str(int(existing_verifications[0].is_good)) if is_not_null(existing_verifications[0].is_good) else None
+
+            obj_data["fields_to_verify"].append((field, decode_text(getattr(new_obj, field)), existing_value, note))
+
+            obj_data["verification_metadata"] = new_obj.get_verification_metadata()
+
+        obj_data["prev_id"] = prev_id
+
+        return render(request, 'django_verifications/correct.html', obj_data)
 
     else:
 

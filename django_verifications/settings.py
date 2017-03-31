@@ -6,7 +6,7 @@ from django.db import models
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-DJANGO_VERIFICATIONS_FIELDS = ('fields_to_verify', 'verification_metadata_fields', 'verification_filters')
+DJANGO_VERIFICATIONS_FIELDS = ('fields_to_verify', 'verification_filters')
 models.options.DEFAULT_NAMES += DJANGO_VERIFICATIONS_FIELDS
 
 for setting, default in [

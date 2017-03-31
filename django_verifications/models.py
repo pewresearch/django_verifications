@@ -22,7 +22,6 @@ class VerifiedModel(BasicExtendedModel):
         abstract=True
 
         fields_to_verify = []
-        verification_metadata_fields = []
         verification_filters = []
 
     def __init__(self, *args, **kwargs):
@@ -52,6 +51,10 @@ class VerifiedModel(BasicExtendedModel):
                         setattr(self, field, original_val)
 
         super(VerifiedModel, self).save(*args, **kwargs)
+
+    def get_verification_metadata(self):
+
+        return self.model.objects.filter(pk=self.pk).values()[0]
 
 
 class Verification(BasicExtendedModel):
