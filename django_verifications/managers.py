@@ -11,7 +11,7 @@ class VerifiedModelManager(BasicExtendedManager):
 
     def verified(self):
 
-        df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good"))
+        df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
         df = df[~df['verifications__field'].isnull()]
         if len(df) > 0:
             df = df.groupby("pk").agg(lambda x: len(x.unique()))
@@ -22,21 +22,22 @@ class VerifiedModelManager(BasicExtendedManager):
 
     def verified_good(self):
 
-        df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good"))
+        df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
         df = df[~df['verifications__field'].isnull()]
         if len(df) > 0:
             good_df = df[df['verifications__is_good'] == True].groupby("pk").agg(lambda x: len(x.unique()))
             good_df = good_df[good_df['verifications__field'] == len(self.model._meta.fields_to_verify)]
-            return self.filter(pk__in=good_df.index)
+            return self.filter(pk__in=good_df.index)\
+                .exclude(pk__in=self.verified_bad())
         else:
             return self.none()
 
     def verified_bad(self):
 
-        df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good"))
+        df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
         df = df[~df['verifications__field'].isnull()]
         if len(df) > 0:
-            bad_df = df[df['verifications__is_good'] == False].groupby("pk").agg(lambda x: len(x.unique()))
+            bad_df = df[(df['verifications__is_good'] == False)&(~df['verifications__corrected'])].groupby("pk").agg(lambda x: len(x.unique()))
             bad_df = bad_df[bad_df['verifications__field'] > 0]
             return self.filter(pk__in=bad_df.index)
         else:
