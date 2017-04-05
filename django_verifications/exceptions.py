@@ -1,0 +1,4 @@
+
+
+class VerifiedFieldLock(Exception):
+    pass

@@ -11,6 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from pewtils.django.abstract_models import BasicExtendedModel
 
 from django_verifications.managers import VerificationManager, VerifiedModelManager
+from django_verifications.exceptions import VerifiedFieldLock
 
 
 class VerifiedModel(BasicExtendedModel):
@@ -36,19 +37,22 @@ class VerifiedModel(BasicExtendedModel):
         except: verifiable = False
         if verifiable:
             for field in self._meta.fields_to_verify:
-                verified = self.verifications.filter(field=field).filter(is_good=True)
-                if verified.count() > 0:
+                good_flags = self.verifications.filter(field=field).filter(is_good=True)
+                bad_flags = self.verifications.filter(field=field).filter(is_good=False).filter(corrected=False)
+                if good_flags.count() > 0 and bad_flags.count() == 0:
                     print "checking {}".format(field)
                     original_val = getattr(self, "__init_{}".format(field))
                     current_val = getattr(self, field)
                     if original_val != current_val:
-                        print "Warning, cannot modify field {} on object {} due to existing verification (currently '{}', attempted to replace with '{}')".format(
-                            field,
-                            self,
-                            original_val,
-                            current_val
-                        )
                         setattr(self, field, original_val)
+                        raise VerifiedFieldLock(
+                            "Cannot modify field {} on object {} due to existing verification (currently '{}', attempted to replace with '{}')".format(
+                                field,
+                                self,
+                                original_val,
+                                current_val
+                            )
+                        )
 
         super(VerifiedModel, self).save(*args, **kwargs)
 
@@ -64,6 +68,7 @@ class Verification(BasicExtendedModel):
     timestamp = models.DateTimeField(auto_now_add=True)
     is_good = models.NullBooleanField(null=True)
     notes = models.TextField(null=True)
+    corrected = models.BooleanField(default=False)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()

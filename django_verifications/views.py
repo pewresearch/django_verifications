@@ -11,6 +11,7 @@ from pewtils.nlp import decode_text
 from pewtils.io import FileHandler
 
 from django_verifications.models import Verification
+from django_verifications.exceptions import VerifiedFieldLock
 
 
 @login_required
@@ -47,7 +48,7 @@ def verify(request, model_name, pk=None):
         obj = model.objects.get(pk=prev_id)
         for field in model._meta.fields_to_verify:
             v = Verification.objects.create_or_update(
-                {"user": request.user, "field": field, "content_object": obj},
+                {"user": request.user, "field": field, model_name: obj},
                 {"timestamp": datetime.datetime.now(), "is_good": eval(request.POST.get(field)), "notes": request.POST.get("{}_notes".format(field))},
                 save_nulls=True
             )
@@ -103,15 +104,29 @@ def correct(request, model_name, pk=None):
         prev_id = request.POST.get("pk")
         obj = model.objects.get(pk=prev_id)
         for field in model._meta.fields_to_verify:
+
             raise Exception("Feature not yet implemented")
-            # v = Verification.objects.get_if_exists({"user": request.user, "field": field, "content_object": obj})
-            # if not v.is_good:
+            # try:
+            #
             #     setattr(obj, field, request.POST.get(field))
             #     obj.save()
-            #     v.timestamp = datetime.datetime.now()
-            #     v.is_good = True
-            #     v.save()
-            #     print "Saving {}, {}: {} ({})".format(obj, field, v.is_good, v.pk)
+            #
+            #     existing_bad_verifications = Verification.objects \
+            #         .filter(**{model_name=obj}) \
+            #         .filter(field=field) \
+            #         .filter(is_bad=True) \
+            #         .filter(corrected=False) \
+            #         .order_by("-timestamp")
+            #     existing_bad_verifications.update(corrected=True)
+            #
+            #     v = Verification.objects.create_or_update(
+            #         {"user": request.user, "field": field, model_name: obj},
+            #         {"timestamp": datetime.datetime.now(), "is_good": True},
+            #         save_nulls=True
+            #     )
+            #
+            # except VerifiedFieldLock:
+            #     pass
 
     if not pk:
         bad = Verification.objects.bad_objects(model_name)
@@ -124,24 +139,25 @@ def correct(request, model_name, pk=None):
 
     if new_obj:
 
-        obj_data = {"fields_to_verify": [], "pk": new_obj.pk, "model_name": model_name}
-        for field in model._meta.fields_to_verify:
-            existing_verifications = Verification.objects\
-                .filter(**{model_name: new_obj})\
-                .filter(user=request.user)\
-                .filter(field=field)\
-                .order_by("-timestamp")
-            note = ""
-            existing_value = None
-            if existing_verifications.count() > 0:
-                note = existing_verifications[0].notes
-                existing_value =  str(int(existing_verifications[0].is_good)) if is_not_null(existing_verifications[0].is_good) else None
+        obj_data = {"pk": new_obj.pk, "model_name": model_name, "field_forms": []}
 
-            obj_data["fields_to_verify"].append((field, decode_text(getattr(new_obj, field)), existing_value, note))
-
-            obj_data["verification_metadata"] = new_obj.get_verification_metadata()
-
+        obj_data["verification_metadata"] = new_obj.get_verification_metadata()
         obj_data["prev_id"] = prev_id
+
+        from django.forms import modelform_factory
+        Form = modelform_factory(model, fields=tuple(model._meta.fields_to_verify))
+        for field in Form(instance=new_obj):
+            existing_verifications = Verification.objects \
+                .filter(**{model_name: new_obj}) \
+                .filter(field=field.name) \
+                .order_by("-timestamp")
+            note, is_good = None, None
+            if existing_verifications.count() > 0:
+                note = "; ".join([v.notes for v in existing_verifications])
+                is_good = not bool(existing_verifications.filter(is_good=False).filter(corrected=False).count() > 0)
+            if hasattr(field.field, "queryset") and field.field.queryset and getattr(new_obj, field.name):
+                field.field.queryset = field.field.queryset.filter(pk=getattr(new_obj, field.name).pk)
+            obj_data["field_forms"].append((field, is_good, note))
 
         return render(request, 'django_verifications/correct.html', obj_data)
 

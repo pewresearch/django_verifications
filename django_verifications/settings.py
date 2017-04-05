@@ -16,6 +16,10 @@ for setting, default in [
     else:
         globals()[setting] = getattr(settings, setting)
 
+INSTALLED_APPS = [
+    "widget_tweaks"
+]
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
