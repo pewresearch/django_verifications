@@ -32,22 +32,35 @@
                             <tr class="{% if is_good %}success{% else %}danger{% endif %}"><td>
                                 {% if field.errors %}
                                     <div class="form-group has-error">
-                                        <label class="col-sm-2 control-label" for="id_{{ field.name }}">{{ field.label }}</label>
+                                        <label class="col-sm-2 control-label" for="id_{{ field.name }}">
+                                            {{ field.label }}
+                                        </label>
                                         <div class="col-sm-10">
-                                            <!-- attr:"class:form-control"|attr:"disabled" -->
-                                            {% if is_good %}{{ field|attr:"class:form-control" }}{% else %}{{ field|attr:"class:form-control" }}{% endif %}
+                                            {% if is_good %}{{ field|attr:"class:form-control"|attr:"disabled" }}{% else %}{{ field|attr:"class:form-control" }}{% endif %}
                                             <span class="help-block">
                                                 {% for error in field.errors %}{{ error }}{% endfor %}
                                             </span>
+                                            {% if is_good %}
+                                                <a href="{% url 'django_verifications:set_as_incorrect' model_name pk field.name %}" class="label-danger label">
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                </a>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 {% else %}
                                     <div class="form-group">
-                                        <label class="col-sm-2 control-label" for="id_{{ field.name }}">{{ field.label }}</label>
+                                        <label class="col-sm-2 control-label" for="id_{{ field.name }}">
+                                            {{ field.label }}
+                                        </label>
                                         <div class="col-sm-10">
-                                            {% if is_good %}{{ field|attr:"class:form-control" }}{% else %}{{ field|attr:"class:form-control" }}{% endif %}
+                                            {% if is_good %}{{ field|attr:"class:form-control"|attr:"disabled" }}{% else %}{{ field|attr:"class:form-control" }}{% endif %}
                                             {% if note %}
                                                 <p class="help-block"><small>{{ note }}</small></p>
+                                            {% endif %}
+                                            {% if is_good %}
+                                                <a href="{% url 'django_verifications:set_as_incorrect' model_name pk field.name %}" class="label-danger label">
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                </a>
                                             {% endif %}
                                         </div>
                                     </div>

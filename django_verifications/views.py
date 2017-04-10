@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.forms import modelform_factory
 
 from pewtils import is_not_null, decode_text
 from pewtils.django import get_model
@@ -48,8 +49,13 @@ def verify(request, model_name, pk=None):
         obj = model.objects.get(pk=prev_id)
         for field in model._meta.fields_to_verify:
             v = Verification.objects.create_or_update(
-                {"user": request.user, "field": field, model_name: obj},
-                {"timestamp": datetime.datetime.now(), "is_good": eval(request.POST.get(field)), "notes": request.POST.get("{}_notes".format(field))},
+                {"user": request.user, "field": field, "content_object": obj},
+                {
+                    "timestamp": datetime.datetime.now(),
+                    "is_good": eval(request.POST.get(field)),
+                    "notes": request.POST.get("{}_notes".format(field)),
+                    "corrected": False
+                },
                 save_nulls=True
             )
             print "Saving {}, {}: {} ({})".format(obj, field, v.is_good, v.pk)
@@ -92,10 +98,24 @@ def verify(request, model_name, pk=None):
 
 
 @login_required
+def set_as_incorrect(request, model_name, pk, field):
+
+    model_name = model_name.replace(" ", "_")
+    model = get_model(model_name, app_name=settings.SITE_NAME)
+    obj = model.objects.get(pk=pk)
+    v = Verification.objects.create_or_update(
+        {"user": request.user, "field": field, "content_object": obj},
+        {"timestamp": datetime.datetime.now(), "is_good": False, "corrected": False},
+        save_nulls=True
+    )
+
+    return correct(request, model_name, pk=pk)
+
+
+@login_required
 def correct(request, model_name, pk=None):
 
     model_name = model_name.replace(" ", "_")
-
     model = get_model(model_name, app_name=settings.SITE_NAME)
 
     prev_id = None
@@ -103,30 +123,35 @@ def correct(request, model_name, pk=None):
 
         prev_id = request.POST.get("pk")
         obj = model.objects.get(pk=prev_id)
-        for field in model._meta.fields_to_verify:
 
-            raise Exception("Feature not yet implemented")
-            # try:
-            #
-            #     setattr(obj, field, request.POST.get(field))
-            #     obj.save()
-            #
-            #     existing_bad_verifications = Verification.objects \
-            #         .filter(**{model_name=obj}) \
-            #         .filter(field=field) \
-            #         .filter(is_bad=True) \
-            #         .filter(corrected=False) \
-            #         .order_by("-timestamp")
-            #     existing_bad_verifications.update(corrected=True)
-            #
-            #     v = Verification.objects.create_or_update(
-            #         {"user": request.user, "field": field, model_name: obj},
-            #         {"timestamp": datetime.datetime.now(), "is_good": True},
-            #         save_nulls=True
-            #     )
-            #
-            # except VerifiedFieldLock:
-            #     pass
+        existing_bad_verifications = Verification.objects \
+            .filter(**{model_name: obj}) \
+            .filter(field__in=model._meta.fields_to_verify) \
+            .filter(is_good=False) \
+            .filter(corrected=False) \
+            .order_by("-timestamp")
+        fields_to_update = list(set(existing_bad_verifications.values_list("field", flat=True)))
+
+        Form = modelform_factory(model, fields=fields_to_update)
+        form = Form(request.POST, instance=obj)
+
+        for field in form:
+            if hasattr(field.field, "queryset") and getattr(obj, field.name):
+                form.fields[field.name].queryset.filter(pk=getattr(obj, field.name).pk)
+
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.save(update_fields=fields_to_update)
+            existing_bad_verifications.update(corrected=True)
+            for field in fields_to_update:
+                v = Verification.objects.create_or_update(
+                    {"user": request.user, "field": field, "content_object": obj},
+                    {"timestamp": datetime.datetime.now(), "is_good": True},
+                    save_nulls=True
+                )
+
+        else:
+            raise Exception("Form was invalid!")
 
     if not pk:
         bad = Verification.objects.bad_objects(model_name)
@@ -144,7 +169,6 @@ def correct(request, model_name, pk=None):
         obj_data["verification_metadata"] = new_obj.get_verification_metadata()
         obj_data["prev_id"] = prev_id
 
-        from django.forms import modelform_factory
         Form = modelform_factory(model, fields=tuple(model._meta.fields_to_verify))
         for field in Form(instance=new_obj):
             existing_verifications = Verification.objects \
@@ -153,7 +177,7 @@ def correct(request, model_name, pk=None):
                 .order_by("-timestamp")
             note, is_good = None, None
             if existing_verifications.count() > 0:
-                note = "; ".join([v.notes for v in existing_verifications])
+                note = "; ".join([v.notes for v in existing_verifications if v.notes])
                 is_good = not bool(existing_verifications.filter(is_good=False).filter(corrected=False).count() > 0)
             if hasattr(field.field, "queryset") and field.field.queryset and getattr(new_obj, field.name):
                 field.field.queryset = field.field.queryset.filter(pk=getattr(new_obj, field.name).pk)
