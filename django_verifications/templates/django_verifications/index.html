@@ -15,15 +15,24 @@
                     <h3 class="panel-title">Verification Tasks</h3>
                 </div>
                 <table class="panel-body table table-condensed">
-                    <tr><th>Model</th><th>Complete</th><th>Need Review</th><th>Unverified</th><th></th><th></th></tr>
+                    <tr>
+                        <th>Model</th>
+                        <th>Total to Verify</th>
+                        <th>Unexamined</th>
+                        <th>Need Correction</th>
+                        <th>Complete</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
                     {% for model in verification_models %}
                         <tr>
-                            <td>{{ model.name }}</td>
-                            <td>{{ model.good }}</td>
-                            <td>{{ model.bad }}</td>
-                            <td>{{ model.unverified }}</td>
-                            <td>{% if model.unverified > 0 %}<a class="btn btn-primary" href="{% url 'django_verifications:verify' model.name %}">Start Coding</a>{% endif %}</td>
-                            <td>{% if model.bad > 0 %}<a class="btn btn-primary" href="{% url 'django_verifications:correct' model.name %}">Make Corrections</a>{% endif %}</td>
+                            <td>{{ model.name.title }}</td>
+                            <td>{{ model.flagged_for_verification }}</td>
+                            <td>{{ model.unexamined }} ({{model.unexamined_pct}}%)</td>
+                            <td>{{ model.need_correction }} ({{model.need_correction_pct}}%)</td>
+                            <td>{{ model.finished }} ({{model.finished_pct}}%)</td>
+                            <td>{% if model.unexamined > 0 %}<a class="btn btn-primary" href="{% url 'django_verifications:verify' model.name %}">Start Coding</a>{% endif %}</td>
+                            <td>{% if model.need_correction > 0 %}<a class="btn btn-primary" href="{% url 'django_verifications:correct' model.name %}">Make Corrections</a>{% endif %}</td>
                         </tr>
                     {% endfor %}
                 </table>
