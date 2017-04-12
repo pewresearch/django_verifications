@@ -33,7 +33,7 @@ class VerifiedModel(BasicExtendedModel):
 
     def save(self, *args, **kwargs):
 
-        try: verifiable = self._meta.model.objects.verifiable().get(pk=self.pk)
+        try: verifiable = self._meta.model.objects.flagged_for_verification().get(pk=self.pk)
         except: verifiable = False
         if verifiable:
             for field in self._meta.fields_to_verify:

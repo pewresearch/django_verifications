@@ -9,9 +9,23 @@ from pewtils.django.managers import BasicExtendedManager
 
 class VerifiedModelManager(BasicExtendedManager):
 
-    def verified(self):
+    def flagged_for_verification(self):
 
-        df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
+        verifiable = self.all()
+        for filter in self.model._meta.verification_filters:
+            verifiable = verifiable.filter(**filter)
+
+        return verifiable
+
+    def has_unexamined_fields(self):
+
+        # not all fields have been examined
+        return self.flagged_for_verification().exclude(pk__in=self.all_fields_examined())
+
+    def all_fields_examined(self):
+
+        # all fields have been examined at least once
+        df = pandas.DataFrame.from_records(self.flagged_for_verification().values("pk", "verifications__field", "verifications__is_good"))
         df = df[~df['verifications__field'].isnull()]
         if len(df) > 0:
             df = df.groupby("pk").agg(lambda x: len(x.unique()))
@@ -20,42 +34,29 @@ class VerifiedModelManager(BasicExtendedManager):
         else:
             return self.none()
 
-    def verified_good(self):
+    def any_field_incorrect(self):
 
-        df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
+        # any field has is_bad=True/corrected=False
+        df = pandas.DataFrame.from_records(self.flagged_for_verification().values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
         df = df[~df['verifications__field'].isnull()]
         if len(df) > 0:
-            good_df = df[df['verifications__is_good'] == True].groupby("pk").agg(lambda x: len(x.unique()))
+            uncorrected_bad_df = df[(df['verifications__is_good'] == False) & (df['verifications__corrected'] == False)].groupby("pk").agg(lambda x: len(x.unique()))
+            uncorrected_bad_df = uncorrected_bad_df[uncorrected_bad_df['verifications__field'] > 0]
+            return self.filter(pk__in=uncorrected_bad_df.index)
+        else:
+            return self.none()
+
+    def all_fields_good_or_corrected(self):
+
+        # all fields are is_good=True or have been corrected
+        df = pandas.DataFrame.from_records(self.flagged_for_verification().values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
+        df = df[~df['verifications__field'].isnull()]
+        if len(df) > 0:
+            good_df = df[(df['verifications__is_good'] == True) | (df['verifications__corrected'] == True)].groupby("pk").agg(lambda x: len(x.unique()))
             good_df = good_df[good_df['verifications__field'] == len(self.model._meta.fields_to_verify)]
-            bad_df = df[(df['verifications__is_good'] == False) & (~df['verifications__corrected'])].groupby("pk").agg(lambda x: len(x.unique()))
-            bad_df = bad_df[bad_df['verifications__field'] > 0]
-            return self.filter(pk__in=good_df.index)\
-                .exclude(pk__in=bad_df.index)
+            return self.filter(pk__in=good_df.index)
         else:
             return self.none()
-
-    def verified_bad(self):
-
-        df = pandas.DataFrame.from_records(self.values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
-        df = df[~df['verifications__field'].isnull()]
-        if len(df) > 0:
-            bad_df = df[(df['verifications__is_good'] == False)&(~df['verifications__corrected'])].groupby("pk").agg(lambda x: len(x.unique()))
-            bad_df = bad_df[bad_df['verifications__field'] > 0]
-            return self.filter(pk__in=bad_df.index)
-        else:
-            return self.none()
-
-    def verifiable(self):
-
-        verifiable = self.all()
-        for filter in self.model._meta.verification_filters:
-            verifiable = verifiable.filter(**filter)
-
-        return verifiable
-
-    def unverified(self):
-
-        return self.verifiable().exclude(pk__in=self.verified())
 
 
 class VerificationManager(BasicExtendedManager):
@@ -73,40 +74,41 @@ class VerificationManager(BasicExtendedManager):
 
         return self.filter(**{"{}__isnull".format(model_name): False})
 
-    def verified_objects(self, model_name):
+    def flagged_for_verification(self, model_name):
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
-        return model.objects.verified()
+        return model.objects.flagged_for_verification()
 
-    def verified(self, model_name):
-
-        return self.filter(**{"{}_id__in".format(model_name): self.verified_objects(model_name).values_list("pk", flat=True)})
-
-    def good_objects(self, model_name):
+    def has_unexamined_fields(self, model_name):
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
-        return model.objects.verified_good()
+        return model.objects.has_unexamined_fields()
 
-    def good(self, model_name):
-
-        return self.filter(**{"{}_id__in".format(model_name): self.good_objects(model_name).values_list("pk", flat=True)})
-
-    def bad_objects(self, model_name):
+    def all_fields_examined(self, model_name):
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
-        return model.objects.verified_bad()
+        return model.objects.all_fields_examined()
 
-    def bad(self, model_name):
-
-        return self.filter(**{"{}_id__in".format(model_name): self.bad_objects(model_name).values_list("pk", flat=True)})
-
-    def verifiable_objects(self, model_name):
+    def any_field_incorrect(self, model_name):
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
-        return model.objects.verifiable()
+        return model.objects.any_field_incorrect()
 
-    def unverified_objects(self, model_name):
+    def all_fields_good_or_corrected(self, model_name):
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
-        return model.objects.unverified()
+        return model.objects.all_fields_good_or_corrected()
+
+    # def verified(self, model_name):
+    #
+    #     return self.filter(**{"{}_id__in".format(model_name): self.verified_objects(model_name).values_list("pk", flat=True)})
+
+    # def good(self, model_name):
+    #
+    #     return self.filter(**{"{}_id__in".format(model_name): self.good_objects(model_name).values_list("pk", flat=True)})
+
+    # def bad(self, model_name):
+    #
+    #     return self.filter(**{"{}_id__in".format(model_name): self.bad_objects(model_name).values_list("pk", flat=True)})
+
 

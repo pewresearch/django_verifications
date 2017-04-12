@@ -20,15 +20,18 @@ def home(request):
 
     verification_models = []
     for model_name in Verification.objects.available_model_names():
-        good = Verification.objects.good_objects(model_name).count()
-        bad = Verification.objects.bad_objects(model_name).count()
-        unverified = Verification.objects.unverified_objects(model_name).count()
-        verification_models.append({
+
+        row = {
             "name": model_name,
-            "good": good,
-            "bad": bad,
-            "unverified": unverified
-        })
+            "flagged_for_verification": Verification.objects.flagged_for_verification(model_name).count(),
+            "unexamined": Verification.objects.has_unexamined_fields(model_name).count(),
+            "need_correction": Verification.objects.any_field_incorrect(model_name).count(),
+            "finished": Verification.objects.all_fields_good_or_corrected(model_name).count()
+        }
+        row["unexamined_pct"] = int((float(row["unexamined"]) / float(row["flagged_for_verification"]))*100)
+        row["need_correction_pct"] = int((float(row["need_correction"]) / float(row["flagged_for_verification"])) * 100)
+        row["finished_pct"] = int((float(row["finished"]) / float(row["flagged_for_verification"])) * 100)
+        verification_models.append(row)
 
     return render(request, 'django_verifications/index.html', {
         "verification_models": verification_models
@@ -61,9 +64,9 @@ def verify(request, model_name, pk=None):
             print "Saving {}, {}: {} ({})".format(obj, field, v.is_good, v.pk)
 
     if not pk:
-        unverified = Verification.objects.unverified_objects(model_name)
-        if unverified.count() > 0:
-            new_obj = unverified.order_by("?")[0]
+        unexamined = Verification.objects.has_unexamined_fields(model_name)
+        if unexamined.count() > 0:
+            new_obj = unexamined.order_by("?")[0]
         else:
             new_obj = None
     else:
@@ -71,7 +74,7 @@ def verify(request, model_name, pk=None):
 
     if new_obj:
 
-        obj_data = {"fields_to_verify": [], "pk": new_obj.pk, "model_name": model_name}
+        obj_data = {"fields_to_verify": [], "pk": new_obj.pk, "model_name": model_name, "num_remaining": unexamined.count()}
         for field in model._meta.fields_to_verify:
             existing_verifications = Verification.objects\
                 .filter(**{model_name: new_obj})\
@@ -154,7 +157,7 @@ def correct(request, model_name, pk=None):
             raise Exception("Form was invalid!")
 
     if not pk:
-        bad = Verification.objects.bad_objects(model_name)
+        bad = Verification.objects.any_field_incorrect(model_name)
         if bad.count() > 0:
             new_obj = bad.order_by("?")[0]
         else:
@@ -164,7 +167,7 @@ def correct(request, model_name, pk=None):
 
     if new_obj:
 
-        obj_data = {"pk": new_obj.pk, "model_name": model_name, "field_forms": []}
+        obj_data = {"pk": new_obj.pk, "model_name": model_name, "field_forms": [], "num_remaining": bad.count()}
 
         obj_data["verification_metadata"] = new_obj.get_verification_metadata()
         obj_data["prev_id"] = prev_id

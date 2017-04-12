@@ -9,7 +9,8 @@
 
 {% block body %}
 
-    <h3>Correction: {{ model_name }} {{ pk }} {% if prev_id %}<a href="{% url 'django_verifications:correct' model_name prev_id %}">Go back</a>{% endif %}</h3>
+    <h3>Corrections: {{ model_name.title }} {{ pk }} {% if prev_id %}<a href="{% url 'django_verifications:correct' model_name prev_id %}">Go back</a>{% endif %}</h3>
+    <small>{{ num_remaining }} left to correct</small>
     <form name='mturk_form' method='post' id='form' action="{% url 'django_verifications:correct' model_name %}">
         {% csrf_token %}
         <input type="hidden" name="pk" value="{{ pk }}">
