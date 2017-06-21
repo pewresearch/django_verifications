@@ -28,9 +28,14 @@ def home(request):
             "need_correction": Verification.objects.any_field_incorrect(model_name).count(),
             "finished": Verification.objects.all_fields_good_or_corrected(model_name).count()
         }
-        row["unexamined_pct"] = int((float(row["unexamined"]) / float(row["flagged_for_verification"]))*100)
-        row["need_correction_pct"] = int((float(row["need_correction"]) / float(row["flagged_for_verification"])) * 100)
-        row["finished_pct"] = int((float(row["finished"]) / float(row["flagged_for_verification"])) * 100)
+        if row["flagged_for_verification"] > 0:
+            row["unexamined_pct"] = int((float(row["unexamined"]) / float(row["flagged_for_verification"]))*100)
+            row["need_correction_pct"] = int((float(row["need_correction"]) / float(row["flagged_for_verification"])) * 100)
+            row["finished_pct"] = int((float(row["finished"]) / float(row["flagged_for_verification"])) * 100)
+        else:
+            row["unexamined_pct"] = "--"
+            row["need_correction_pct"] = "--"
+            row["finished_pct"] = "--"
         verification_models.append(row)
 
     return render(request, 'django_verifications/index.html', {
@@ -63,8 +68,8 @@ def verify(request, model_name, pk=None):
             )
             print "Saving {}, {}: {} ({})".format(obj, field, v.is_good, v.pk)
 
+    unexamined = Verification.objects.has_unexamined_fields(model_name)
     if not pk:
-        unexamined = Verification.objects.has_unexamined_fields(model_name)
         if unexamined.count() > 0:
             new_obj = unexamined.order_by("?")[0]
         else:
@@ -156,8 +161,8 @@ def correct(request, model_name, pk=None):
         else:
             raise Exception("Form was invalid!")
 
+    bad = Verification.objects.any_field_incorrect(model_name)
     if not pk:
-        bad = Verification.objects.any_field_incorrect(model_name)
         if bad.count() > 0:
             new_obj = bad.order_by("?")[0]
         else:
