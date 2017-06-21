@@ -26,8 +26,8 @@ class VerifiedModelManager(BasicExtendedManager):
 
         # all fields have been examined at least once
         df = pandas.DataFrame.from_records(self.flagged_for_verification().values("pk", "verifications__field", "verifications__is_good"))
-        df = df[~df['verifications__field'].isnull()]
-        if len(df) > 0:
+        if len(df) > 0 and len(df[~df['verifications__field'].isnull()]) > 0:
+            df = df[~df['verifications__field'].isnull()]
             df = df.groupby("pk").agg(lambda x: len(x.unique()))
             df = df[df['verifications__field'] == len(self.model._meta.fields_to_verify)]
             return self.filter(pk__in=df.index)
@@ -38,8 +38,8 @@ class VerifiedModelManager(BasicExtendedManager):
 
         # any field has is_bad=True/corrected=False
         df = pandas.DataFrame.from_records(self.flagged_for_verification().values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
-        df = df[~df['verifications__field'].isnull()]
-        if len(df) > 0:
+        if len(df) > 0 and len(df[~df['verifications__field'].isnull()]) > 0:
+            df = df[~df['verifications__field'].isnull()]
             uncorrected_bad_df = df[(df['verifications__is_good'] == False) & (df['verifications__corrected'] == False)].groupby("pk").agg(lambda x: len(x.unique()))
             uncorrected_bad_df = uncorrected_bad_df[uncorrected_bad_df['verifications__field'] > 0]
             return self.filter(pk__in=uncorrected_bad_df.index)
@@ -50,8 +50,8 @@ class VerifiedModelManager(BasicExtendedManager):
 
         # all fields are is_good=True or have been corrected
         df = pandas.DataFrame.from_records(self.flagged_for_verification().values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
-        df = df[~df['verifications__field'].isnull()]
-        if len(df) > 0:
+        if len(df) > 0 and len(df[~df['verifications__field'].isnull()]) > 0:
+            df = df[~df['verifications__field'].isnull()]
             good_df = df[(df['verifications__is_good'] == True) | (df['verifications__corrected'] == True)].groupby("pk").agg(lambda x: len(x.unique()))
             good_df = good_df[good_df['verifications__field'] == len(self.model._meta.fields_to_verify)]
             return self.filter(pk__in=good_df.index)
