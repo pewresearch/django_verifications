@@ -44,7 +44,7 @@
 
                             <tr><td class="form-group col-md-4">Notes</td><td class="form-group col-md-8">
                                 <fieldset class="form-group">
-                                    <textarea id="{{ k }}_notes" name="{{ k }}_notes" value="{{ note }}" class="form-control" rows="3" placeholder="Notes">{{ note }}</textarea>
+                                    <textarea id="{{ k }}_notes" name="{{ k }}_notes" value="{% if note %}{{ note }}{% endif %}" class="form-control" rows="3" placeholder="Notes">{% if note %}{{ note }}{% endif %}</textarea>
                                 </fieldset>
                             </td></tr>
 

@@ -16,17 +16,18 @@
         <input type="hidden" name="pk" value="{{ pk }}">
         <div class="row">
 
-            <div class="col-md-5">
+            <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-body" style="overflow: scroll; height: 450px;">
                         {% for k, v in verification_metadata.iteritems %}
-                            <p><b>{{ k }}:</b> {{ v }}</p>
+                            <p><b>{{ k }}:</b> {{ v|safe }}</p>
                         {% endfor %}
                     </div>
                 </div>
             </div>
-
-            <div class="col-md-7">
+        </div>
+        <div class="row">
+            <div class="col-md-12">
                 <div class="panel panel-default">
                     <table class="panel-body table table-condensed">
                         {% for field, is_good, note in field_forms %}
