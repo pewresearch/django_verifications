@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from pewtils.django.abstract_models import BasicExtendedModel
+from django_pewtils.abstract_models import BasicExtendedModel
 
 from django_verifications.managers import VerificationManager, VerifiedModelManager
 from django_verifications.exceptions import VerifiedFieldLock
