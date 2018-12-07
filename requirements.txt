@@ -2,3 +2,4 @@ django<2.0
 pandas>=0.19.2
 django-widget-tweaks>=1.4.1
 git+ssh://labsdeploy/pewresearch/pewtils#egg=pewtils
+git+ssh://labsdeploy/pewresearch/django_pewtils#egg=django_pewtils
