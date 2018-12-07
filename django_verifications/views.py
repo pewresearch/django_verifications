@@ -7,7 +7,7 @@ from django.conf import settings
 from django.forms import modelform_factory
 
 from pewtils import is_not_null, decode_text
-from pewtils.django import get_model
+from django_pewtils import get_model
 from pewtils.nlp import decode_text
 from pewtils.io import FileHandler
 

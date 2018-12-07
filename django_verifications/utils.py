@@ -2,7 +2,7 @@
 #
 # from django.apps import apps
 #
-# from pewtils.django import get_model
+# from django_pewtils import get_model
 #
 # from django_verifications.models import Verification
 #
