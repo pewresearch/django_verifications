@@ -8,7 +8,7 @@ from django.forms import modelform_factory
 
 from pewtils import is_not_null, decode_text
 from django_pewtils import get_model
-from pewtils.nlp import decode_text
+from pewtils import decode_text
 from pewtils.io import FileHandler
 
 from django_verifications.models import Verification
