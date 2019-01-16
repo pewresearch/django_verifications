@@ -1,3 +1,4 @@
+from __future__ import print_function
 import datetime
 
 from django.shortcuts import render
@@ -66,7 +67,7 @@ def verify(request, model_name, pk=None):
                 },
                 save_nulls=True
             )
-            print "Saving {}, {}: {} ({})".format(obj, field, v.is_good, v.pk)
+            print("Saving {}, {}: {} ({})".format(obj, field, v.is_good, v.pk))
 
     unexamined = Verification.objects.has_unexamined_fields(model_name)
     if not pk:
