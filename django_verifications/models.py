@@ -1,3 +1,4 @@
+from builtins import object
 import re
 
 from django.db import models
@@ -18,7 +19,7 @@ class VerifiedModel(BasicExtendedModel):
 
     objects = VerifiedModelManager().as_manager()
 
-    class Meta:
+    class Meta(object):
 
         abstract=True
 
@@ -58,7 +59,7 @@ class VerifiedModel(BasicExtendedModel):
 
     def get_verification_metadata(self):
 
-        return self.model.objects.filter(pk=self.pk).values()[0]
+        return list(self.model.objects.filter(pk=self.pk).values())[0]
 
 
 class Verification(BasicExtendedModel):
