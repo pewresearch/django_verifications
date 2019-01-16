@@ -64,8 +64,8 @@ class VerificationManager(BasicExtendedManager):
     def available_model_names(self):
 
         verification_model_names = []
-        for app, model_list in apps.all_models.iteritems():
-            for model_name, model in model_list.iteritems():
+        for app, model_list in apps.all_models.items():
+            for model_name, model in model_list.items():
                 if model.__base__.__name__ == "VerifiedModel":
                     verification_model_names.append(model._meta.verbose_name)
         return verification_model_names
