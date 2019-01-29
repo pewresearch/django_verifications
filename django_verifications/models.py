@@ -65,7 +65,7 @@ class VerifiedModel(BasicExtendedModel):
 class Verification(BasicExtendedModel):
 
     field = models.CharField(max_length=150)
-    user = models.ForeignKey(User, related_name="verifications")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="verifications")
     timestamp = models.DateTimeField(auto_now_add=True)
     is_good = models.NullBooleanField(null=True)
     notes = models.TextField(null=True)
