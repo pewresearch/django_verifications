@@ -1,4 +1,5 @@
-django<2.0
+django<2.0; python_version < '3.0'
+django>=2.1; python_version >= '3.0'
 pandas>=0.19.2
 django-widget-tweaks>=1.4.1
 git+ssh://labsdeploy/pewresearch/pewtils#egg=pewtils
