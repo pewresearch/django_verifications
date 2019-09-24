@@ -87,7 +87,7 @@ class Verification(BasicExtendedModel):
 
 def add_verifications(sender, **kwargs):
 
-    if sender.__base__ == VerifiedModel:
+    if VerifiedModel in sender.__bases__:
         verifications = GenericRelation(
             Verification, related_query_name=re.sub(" ", "_", sender._meta.verbose_name)
         )
