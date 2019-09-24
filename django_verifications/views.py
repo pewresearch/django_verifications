@@ -26,24 +26,42 @@ def home(request):
 
         row = {
             "name": model_name,
-            "flagged_for_verification": Verification.objects.flagged_for_verification(model_name).count(),
-            "unexamined": Verification.objects.has_unexamined_fields(model_name).count(),
-            "need_correction": Verification.objects.any_field_incorrect(model_name).count(),
-            "finished": Verification.objects.all_fields_good_or_corrected(model_name).count()
+            "flagged_for_verification": Verification.objects.flagged_for_verification(
+                model_name
+            ).count(),
+            "unexamined": Verification.objects.has_unexamined_fields(
+                model_name
+            ).count(),
+            "need_correction": Verification.objects.any_field_incorrect(
+                model_name
+            ).count(),
+            "finished": Verification.objects.all_fields_good_or_corrected(
+                model_name
+            ).count(),
         }
         if row["flagged_for_verification"] > 0:
-            row["unexamined_pct"] = int((float(row["unexamined"]) / float(row["flagged_for_verification"]))*100)
-            row["need_correction_pct"] = int((float(row["need_correction"]) / float(row["flagged_for_verification"])) * 100)
-            row["finished_pct"] = int((float(row["finished"]) / float(row["flagged_for_verification"])) * 100)
+            row["unexamined_pct"] = int(
+                (float(row["unexamined"]) / float(row["flagged_for_verification"]))
+                * 100
+            )
+            row["need_correction_pct"] = int(
+                (float(row["need_correction"]) / float(row["flagged_for_verification"]))
+                * 100
+            )
+            row["finished_pct"] = int(
+                (float(row["finished"]) / float(row["flagged_for_verification"])) * 100
+            )
         else:
             row["unexamined_pct"] = "--"
             row["need_correction_pct"] = "--"
             row["finished_pct"] = "--"
         verification_models.append(row)
 
-    return render(request, 'django_verifications/index.html', {
-        "verification_models": verification_models
-    })
+    return render(
+        request,
+        "django_verifications/index.html",
+        {"verification_models": verification_models},
+    )
 
 
 @login_required
@@ -65,9 +83,9 @@ def verify(request, model_name, pk=None):
                     "timestamp": datetime.datetime.now(),
                     "is_good": eval(request.POST.get(field)),
                     "notes": request.POST.get("{}_notes".format(field)),
-                    "corrected": False
+                    "corrected": False,
                 },
-                save_nulls=True
+                save_nulls=True,
             )
             print("Saving {}, {}: {} ({})".format(obj, field, v.is_good, v.pk))
 
@@ -82,26 +100,38 @@ def verify(request, model_name, pk=None):
 
     if new_obj:
 
-        obj_data = {"fields_to_verify": [], "pk": new_obj.pk, "model_name": model_name, "num_remaining": unexamined.count()}
+        obj_data = {
+            "fields_to_verify": [],
+            "pk": new_obj.pk,
+            "model_name": model_name,
+            "num_remaining": unexamined.count(),
+        }
         for field in model._meta.fields_to_verify:
-            existing_verifications = Verification.objects\
-                .filter(**{model_name: new_obj})\
-                .filter(user=request.user)\
-                .filter(field=field)\
+            existing_verifications = (
+                Verification.objects.filter(**{model_name: new_obj})
+                .filter(user=request.user)
+                .filter(field=field)
                 .order_by("-timestamp")
+            )
             note = ""
             existing_value = None
             if existing_verifications.count() > 0:
                 note = existing_verifications[0].notes
-                existing_value =  str(int(existing_verifications[0].is_good)) if is_not_null(existing_verifications[0].is_good) else None
+                existing_value = (
+                    str(int(existing_verifications[0].is_good))
+                    if is_not_null(existing_verifications[0].is_good)
+                    else None
+                )
 
-            obj_data["fields_to_verify"].append((field, decode_text(getattr(new_obj, field)), existing_value, note))
+            obj_data["fields_to_verify"].append(
+                (field, decode_text(getattr(new_obj, field)), existing_value, note)
+            )
 
         obj_data["verification_metadata"] = new_obj.get_verification_metadata()
 
         obj_data["prev_id"] = prev_id
 
-        return render(request, 'django_verifications/verify.html', obj_data)
+        return render(request, "django_verifications/verify.html", obj_data)
 
     else:
 
@@ -117,7 +147,7 @@ def set_as_incorrect(request, model_name, pk, field):
     v = Verification.objects.create_or_update(
         {"user": request.user, "field": field, "content_object": obj},
         {"timestamp": datetime.datetime.now(), "is_good": False, "corrected": False},
-        save_nulls=True
+        save_nulls=True,
     )
 
     return correct(request, model_name, pk=pk)
@@ -135,13 +165,16 @@ def correct(request, model_name, pk=None):
         prev_id = request.POST.get("pk")
         obj = model.objects.get(pk=prev_id)
 
-        existing_bad_verifications = Verification.objects \
-            .filter(**{model_name: obj}) \
-            .filter(field__in=model._meta.fields_to_verify) \
-            .filter(is_good=False) \
-            .filter(corrected=False) \
+        existing_bad_verifications = (
+            Verification.objects.filter(**{model_name: obj})
+            .filter(field__in=model._meta.fields_to_verify)
+            .filter(is_good=False)
+            .filter(corrected=False)
             .order_by("-timestamp")
-        fields_to_update = list(set(existing_bad_verifications.values_list("field", flat=True)))
+        )
+        fields_to_update = list(
+            set(existing_bad_verifications.values_list("field", flat=True))
+        )
 
         Form = modelform_factory(model, fields=fields_to_update)
         form = Form(request.POST, instance=obj)
@@ -158,7 +191,7 @@ def correct(request, model_name, pk=None):
                 v = Verification.objects.create_or_update(
                     {"user": request.user, "field": field, "content_object": obj},
                     {"timestamp": datetime.datetime.now(), "is_good": True},
-                    save_nulls=True
+                    save_nulls=True,
                 )
 
         else:
@@ -175,26 +208,43 @@ def correct(request, model_name, pk=None):
 
     if new_obj:
 
-        obj_data = {"pk": new_obj.pk, "model_name": model_name, "field_forms": [], "num_remaining": bad.count()}
+        obj_data = {
+            "pk": new_obj.pk,
+            "model_name": model_name,
+            "field_forms": [],
+            "num_remaining": bad.count(),
+        }
 
         obj_data["verification_metadata"] = new_obj.get_verification_metadata()
         obj_data["prev_id"] = prev_id
 
         Form = modelform_factory(model, fields=tuple(model._meta.fields_to_verify))
         for field in Form(instance=new_obj):
-            existing_verifications = Verification.objects \
-                .filter(**{model_name: new_obj}) \
-                .filter(field=field.name) \
+            existing_verifications = (
+                Verification.objects.filter(**{model_name: new_obj})
+                .filter(field=field.name)
                 .order_by("-timestamp")
+            )
             note, is_good = None, None
             if existing_verifications.count() > 0:
                 note = "; ".join([v.notes for v in existing_verifications if v.notes])
-                is_good = not bool(existing_verifications.filter(is_good=False).filter(corrected=False).count() > 0)
-            if hasattr(field.field, "queryset") and field.field.queryset and getattr(new_obj, field.name):
-                field.field.queryset = field.field.queryset.filter(pk=getattr(new_obj, field.name).pk)
+                is_good = not bool(
+                    existing_verifications.filter(is_good=False)
+                    .filter(corrected=False)
+                    .count()
+                    > 0
+                )
+            if (
+                hasattr(field.field, "queryset")
+                and field.field.queryset
+                and getattr(new_obj, field.name)
+            ):
+                field.field.queryset = field.field.queryset.filter(
+                    pk=getattr(new_obj, field.name).pk
+                )
             obj_data["field_forms"].append((field, is_good, note))
 
-        return render(request, 'django_verifications/correct.html', obj_data)
+        return render(request, "django_verifications/correct.html", obj_data)
 
     else:
 

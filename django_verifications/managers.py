@@ -8,7 +8,6 @@ from django_pewtils.managers import BasicExtendedManager
 
 
 class VerifiedModelManager(BasicExtendedManager):
-
     def flagged_for_verification(self):
 
         verifiable = self.all()
@@ -20,16 +19,24 @@ class VerifiedModelManager(BasicExtendedManager):
     def has_unexamined_fields(self):
 
         # not all fields have been examined
-        return self.flagged_for_verification().exclude(pk__in=self.all_fields_examined())
+        return self.flagged_for_verification().exclude(
+            pk__in=self.all_fields_examined()
+        )
 
     def all_fields_examined(self):
 
         # all fields have been examined at least once
-        df = pandas.DataFrame.from_records(self.flagged_for_verification().values("pk", "verifications__field", "verifications__is_good"))
-        if len(df) > 0 and len(df[~df['verifications__field'].isnull()]) > 0:
-            df = df[~df['verifications__field'].isnull()]
+        df = pandas.DataFrame.from_records(
+            self.flagged_for_verification().values(
+                "pk", "verifications__field", "verifications__is_good"
+            )
+        )
+        if len(df) > 0 and len(df[~df["verifications__field"].isnull()]) > 0:
+            df = df[~df["verifications__field"].isnull()]
             df = df.groupby("pk").agg(lambda x: len(x.unique()))
-            df = df[df['verifications__field'] == len(self.model._meta.fields_to_verify)]
+            df = df[
+                df["verifications__field"] == len(self.model._meta.fields_to_verify)
+            ]
             return self.filter(pk__in=df.index)
         else:
             return self.none()
@@ -37,11 +44,27 @@ class VerifiedModelManager(BasicExtendedManager):
     def any_field_incorrect(self):
 
         # any field has is_bad=True/corrected=False
-        df = pandas.DataFrame.from_records(self.flagged_for_verification().values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
-        if len(df) > 0 and len(df[~df['verifications__field'].isnull()]) > 0:
-            df = df[~df['verifications__field'].isnull()]
-            uncorrected_bad_df = df[(df['verifications__is_good'] == False) & (df['verifications__corrected'] == False)].groupby("pk").agg(lambda x: len(x.unique()))
-            uncorrected_bad_df = uncorrected_bad_df[uncorrected_bad_df['verifications__field'] > 0]
+        df = pandas.DataFrame.from_records(
+            self.flagged_for_verification().values(
+                "pk",
+                "verifications__field",
+                "verifications__is_good",
+                "verifications__corrected",
+            )
+        )
+        if len(df) > 0 and len(df[~df["verifications__field"].isnull()]) > 0:
+            df = df[~df["verifications__field"].isnull()]
+            uncorrected_bad_df = (
+                df[
+                    (df["verifications__is_good"] == False)
+                    & (df["verifications__corrected"] == False)
+                ]
+                .groupby("pk")
+                .agg(lambda x: len(x.unique()))
+            )
+            uncorrected_bad_df = uncorrected_bad_df[
+                uncorrected_bad_df["verifications__field"] > 0
+            ]
             return self.filter(pk__in=uncorrected_bad_df.index)
         else:
             return self.none()
@@ -49,18 +72,34 @@ class VerifiedModelManager(BasicExtendedManager):
     def all_fields_good_or_corrected(self):
 
         # all fields are is_good=True or have been corrected
-        df = pandas.DataFrame.from_records(self.flagged_for_verification().values("pk", "verifications__field", "verifications__is_good", "verifications__corrected"))
-        if len(df) > 0 and len(df[~df['verifications__field'].isnull()]) > 0:
-            df = df[~df['verifications__field'].isnull()]
-            good_df = df[(df['verifications__is_good'] == True) | (df['verifications__corrected'] == True)].groupby("pk").agg(lambda x: len(x.unique()))
-            good_df = good_df[good_df['verifications__field'] == len(self.model._meta.fields_to_verify)]
+        df = pandas.DataFrame.from_records(
+            self.flagged_for_verification().values(
+                "pk",
+                "verifications__field",
+                "verifications__is_good",
+                "verifications__corrected",
+            )
+        )
+        if len(df) > 0 and len(df[~df["verifications__field"].isnull()]) > 0:
+            df = df[~df["verifications__field"].isnull()]
+            good_df = (
+                df[
+                    (df["verifications__is_good"] == True)
+                    | (df["verifications__corrected"] == True)
+                ]
+                .groupby("pk")
+                .agg(lambda x: len(x.unique()))
+            )
+            good_df = good_df[
+                good_df["verifications__field"]
+                == len(self.model._meta.fields_to_verify)
+            ]
             return self.filter(pk__in=good_df.index)
         else:
             return self.none()
 
 
 class VerificationManager(BasicExtendedManager):
-
     def available_model_names(self):
 
         verification_model_names = []
@@ -110,5 +149,3 @@ class VerificationManager(BasicExtendedManager):
     # def bad(self, model_name):
     #
     #     return self.filter(**{"{}_id__in".format(model_name): self.bad_objects(model_name).values_list("pk", flat=True)})
-
-
