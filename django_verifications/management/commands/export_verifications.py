@@ -5,12 +5,12 @@ from tqdm import tqdm
 
 class Command(BaseCommand):
 
-    help = ''
+    help = ""
 
     def add_arguments(self, parser):
 
-        parser.add_argument('model_name', type=str)
-        parser.add_argument('file_path', type=str)
+        parser.add_argument("model_name", type=str)
+        parser.add_argument("file_path", type=str)
 
     def handle(self, *args, **options):
 

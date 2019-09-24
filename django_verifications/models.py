@@ -21,7 +21,7 @@ class VerifiedModel(BasicExtendedModel):
 
     class Meta(object):
 
-        abstract=True
+        abstract = True
 
         fields_to_verify = []
         verification_filters = []
@@ -34,12 +34,20 @@ class VerifiedModel(BasicExtendedModel):
 
     def save(self, *args, **kwargs):
 
-        try: verifiable = self._meta.model.objects.flagged_for_verification().get(pk=self.pk)
-        except: verifiable = False
+        try:
+            verifiable = self._meta.model.objects.flagged_for_verification().get(
+                pk=self.pk
+            )
+        except:
+            verifiable = False
         if verifiable:
             for field in self._meta.fields_to_verify:
                 good_flags = self.verifications.filter(field=field).filter(is_good=True)
-                bad_flags = self.verifications.filter(field=field).filter(is_good=False).filter(corrected=False)
+                bad_flags = (
+                    self.verifications.filter(field=field)
+                    .filter(is_good=False)
+                    .filter(corrected=False)
+                )
                 if good_flags.count() > 0 and bad_flags.count() == 0:
                     # print "checking {}".format(field)
                     original_val = getattr(self, "__init_{}".format(field))
@@ -48,10 +56,7 @@ class VerifiedModel(BasicExtendedModel):
                         setattr(self, field, original_val)
                         raise VerifiedFieldLock(
                             "Cannot modify field {} on object {} due to existing verification (currently '{}', attempted to replace with '{}')".format(
-                                field,
-                                self,
-                                original_val,
-                                current_val
+                                field, self, original_val, current_val
                             )
                         )
 
@@ -65,7 +70,9 @@ class VerifiedModel(BasicExtendedModel):
 class Verification(BasicExtendedModel):
 
     field = models.CharField(max_length=150)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="verifications")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="verifications"
+    )
     timestamp = models.DateTimeField(auto_now_add=True)
     is_good = models.NullBooleanField(null=True)
     notes = models.TextField(null=True)
@@ -73,7 +80,7 @@ class Verification(BasicExtendedModel):
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
 
     objects = VerificationManager().as_manager()
 
@@ -81,7 +88,10 @@ class Verification(BasicExtendedModel):
 def add_verifications(sender, **kwargs):
 
     if sender.__base__ == VerifiedModel:
-        verifications = GenericRelation(Verification, related_query_name=re.sub(" ", "_", sender._meta.verbose_name))
+        verifications = GenericRelation(
+            Verification, related_query_name=re.sub(" ", "_", sender._meta.verbose_name)
+        )
         verifications.contribute_to_class(sender, "verifications")
+
 
 class_prepared.connect(add_verifications)
