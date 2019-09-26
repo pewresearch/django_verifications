@@ -38,7 +38,7 @@ class VerifiedModel(BasicExtendedModel):
             verifiable = self._meta.model.objects.flagged_for_verification().get(
                 pk=self.pk
             )
-        except:
+        except self._meta.model.DoesNotExist:
             verifiable = False
         if verifiable:
             for field in self._meta.fields_to_verify:
