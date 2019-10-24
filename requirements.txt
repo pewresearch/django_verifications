@@ -1,6 +1,9 @@
 django<2.0; python_version < '3.0'
 django>=2.1; python_version >= '3.0'
-pandas>=0.19.2
+numpy<1.17.0; python_version < '3.0'
+numpy>=1.16.0; python_version >= '3.0'
+pandas<0.25.0; python_version < '3.0'
+pandas>=0.25.0; python_version >= '3.0'
 django-widget-tweaks>=1.4.1
 git+ssh://labsdeploy/pewresearch/pewtils#egg=pewtils
 git+ssh://labsdeploy/pewresearch/django_pewtils#egg=django_pewtils
