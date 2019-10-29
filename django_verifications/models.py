@@ -49,7 +49,6 @@ class VerifiedModel(BasicExtendedModel):
                     .filter(corrected=False)
                 )
                 if good_flags.count() > 0 and bad_flags.count() == 0:
-                    # print "checking {}".format(field)
                     original_val = getattr(self, "__init_{}".format(field))
                     current_val = getattr(self, field)
                     if original_val != current_val:

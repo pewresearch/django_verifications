@@ -144,7 +144,7 @@ def set_as_incorrect(request, model_name, pk, field):
     model_name = model_name.replace(" ", "_")
     model = get_model(model_name, app_name=settings.SITE_NAME)
     obj = model.objects.get(pk=pk)
-    v = Verification.objects.create_or_update(
+    Verification.objects.create_or_update(
         {"user": request.user, "field": field, "content_object": obj},
         {"timestamp": datetime.datetime.now(), "is_good": False, "corrected": False},
         save_nulls=True,

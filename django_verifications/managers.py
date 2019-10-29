@@ -137,15 +137,3 @@ class VerificationManager(BasicExtendedManager):
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
         return model.objects.all_fields_good_or_corrected()
-
-    # def verified(self, model_name):
-    #
-    #     return self.filter(**{"{}_id__in".format(model_name): self.verified_objects(model_name).values_list("pk", flat=True)})
-
-    # def good(self, model_name):
-    #
-    #     return self.filter(**{"{}_id__in".format(model_name): self.good_objects(model_name).values_list("pk", flat=True)})
-
-    # def bad(self, model_name):
-    #
-    #     return self.filter(**{"{}_id__in".format(model_name): self.bad_objects(model_name).values_list("pk", flat=True)})
