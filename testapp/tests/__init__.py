@@ -330,5 +330,9 @@ class BaseTests(DjangoTestCase):
                 self.assertEqual(func(response.context), value)
 
     def tearDown(self):
+        from django.conf import settings
+        import shutil, os
 
-        pass
+        cache_path = os.path.join(settings.BASE_DIR, settings.LOCAL_CACHE_ROOT)
+        if os.path.exists(cache_path):
+            shutil.rmtree(cache_path)
