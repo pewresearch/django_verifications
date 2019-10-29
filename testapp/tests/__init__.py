@@ -27,7 +27,7 @@ class BaseTests(DjangoTestCase):
         )
         for index, row in reviews[:50].iterrows():
             if is_not_null(row["text"]):
-                obj = MovieReview.objects.create(text=row["text"][:200], id=index)
+                MovieReview.objects.create(text=row["text"][:200], id=index)
 
         self.factory = RequestFactory()
         self.user = User.objects.create_user(username="test", email="test@test.com")
@@ -64,7 +64,7 @@ class BaseTests(DjangoTestCase):
 
         for obj in MovieReview.objects.flagged_for_verification():
             for field in MovieReview._meta.fields_to_verify:
-                v = Verification.objects.create_or_update(
+                Verification.objects.create_or_update(
                     {"user": user, "field": field, "content_object": obj},
                     {"is_good": False, "corrected": False},
                 )
@@ -82,7 +82,7 @@ class BaseTests(DjangoTestCase):
 
         for obj in MovieReview.objects.flagged_for_verification():
             for field in MovieReview._meta.fields_to_verify:
-                v = Verification.objects.create_or_update(
+                Verification.objects.create_or_update(
                     {"user": user, "field": field, "content_object": obj},
                     {"is_good": True, "corrected": True},
                 )
