@@ -66,3 +66,12 @@ LOGIN_URL = "/login"
 LOGIN_REDIRECT_URL = "/"
 LOGIN_ERROR_URL = "/login"
 AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+
+MEDIA_URL = "/media/"
+ADMIN_MEDIA_PREFIX = "/media/admin/"
+STATIC_URL = "/static/"
+STATICFILES_DIRS = []
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+)
