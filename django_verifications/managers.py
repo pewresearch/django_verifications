@@ -98,6 +98,29 @@ class VerifiedModelManager(BasicExtendedManager):
         else:
             return self.none()
 
+    def get_verification_table(self):
+
+        objects = pd.DataFrame.from_records(self.values())
+        verifications = pd.DataFrame.from_records(
+            get_model("Verification", app_name="django_verifications")
+            .objects.filter_by_model_name(
+                self.model._meta.verbose_name.replace(" ", "_")
+            )
+            .values()
+        )
+        dfs = []
+        for field in verifications["field"].unique():
+            vers = verifications.loc[verifications["field"] == field]
+            del vers["id"]
+            objs = objects.loc[objects["id"].isin(vers["object_id"])]
+            objs = objs[["id", field]]
+            objs = objs.merge(vers, how="left", left_on="id", right_on="object_id")
+            objs = objs[
+                ["id", field, "user_id", "timestamp", "is_good", "notes", "corrected"]
+            ]
+            dfs.append(objs)
+        return pd.concat(dfs)
+
 
 class VerificationManager(BasicExtendedManager):
     def available_model_names(self):

@@ -100,6 +100,9 @@ class BaseTests(DjangoTestCase):
         obj.text = "NEW TEXT"
         self.assertRaises(VerifiedFieldLock, obj.save)
 
+        df = MovieReview.objects.get_verification_table()
+        self.assertEqual(len(df), 5)
+
     def test_views(self):
 
         from django.urls import reverse
@@ -113,7 +116,7 @@ class BaseTests(DjangoTestCase):
                 [],
                 {},
                 [
-                    (lambda x: x["verification_models"][0]["name"], "movie review"),
+                    (lambda x: x["verification_models"][0]["name"], "movie_review"),
                     (
                         lambda x: x["verification_models"][0][
                             "flagged_for_verification"
