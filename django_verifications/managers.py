@@ -1,4 +1,4 @@
-import pandas
+import pandas as pd
 
 from django.conf import settings
 from django.apps import apps
@@ -26,7 +26,7 @@ class VerifiedModelManager(BasicExtendedManager):
     def all_fields_examined(self):
 
         # all fields have been examined at least once
-        df = pandas.DataFrame.from_records(
+        df = pd.DataFrame.from_records(
             self.flagged_for_verification().values(
                 "pk", "verifications__field", "verifications__is_good"
             )
@@ -44,7 +44,7 @@ class VerifiedModelManager(BasicExtendedManager):
     def any_field_incorrect(self):
 
         # any field has is_bad=True/corrected=False
-        df = pandas.DataFrame.from_records(
+        df = pd.DataFrame.from_records(
             self.flagged_for_verification().values(
                 "pk",
                 "verifications__field",
@@ -72,7 +72,7 @@ class VerifiedModelManager(BasicExtendedManager):
     def all_fields_good_or_corrected(self):
 
         # all fields are is_good=True or have been corrected
-        df = pandas.DataFrame.from_records(
+        df = pd.DataFrame.from_records(
             self.flagged_for_verification().values(
                 "pk",
                 "verifications__field",
@@ -106,7 +106,8 @@ class VerificationManager(BasicExtendedManager):
         for app, model_list in apps.all_models.items():
             for model_name, model in model_list.items():
                 if "VerifiedModel" in [base.__name__ for base in model.__bases__]:
-                    verification_model_names.append(model._meta.verbose_name)
+                    model_name = model._meta.verbose_name.replace(" ", "_")
+                    verification_model_names.append(model_name)
         return verification_model_names
 
     def filter_by_model_name(self, model_name):
