@@ -8,7 +8,18 @@ from django_pewtils.managers import BasicExtendedManager
 
 
 class VerifiedModelManager(BasicExtendedManager):
+
+    """
+    A manager for use with `VerifiedModel` classes.  Provides functions for filtering objects by verification status.
+    """
+
     def flagged_for_verification(self):
+
+        """
+        Selects all objects on the model that have been designated for verification, as specified by the model's
+        `verification_filters` Meta attribute.
+        :return: A QuerySet of all objects selected for verification
+        """
 
         verifiable = self.all()
         for filter in self.model._meta.verification_filters:
@@ -18,14 +29,24 @@ class VerifiedModelManager(BasicExtendedManager):
 
     def has_unexamined_fields(self):
 
-        # not all fields have been examined
+        """
+        Selects all objects on the model that have one or more fields that need to be verified, as specified by
+        the `fields_to_verify` Meta attribute.
+        :return: A QuerySet of all objects with at least one unverified field
+        """
+
         return self.flagged_for_verification().exclude(
             pk__in=self.all_fields_examined()
         )
 
     def all_fields_examined(self):
 
-        # all fields have been examined at least once
+        """
+        Selects all objects on the model that have had all of their fields examined, as specified by the
+        `fields_to_verify` Meta attribute.
+        :return: A QuerySet of all objects that have had all of their fields examined
+        """
+
         df = pd.DataFrame.from_records(
             self.flagged_for_verification().values(
                 "pk", "verifications__field", "verifications__is_good"
@@ -43,7 +64,12 @@ class VerifiedModelManager(BasicExtendedManager):
 
     def any_field_incorrect(self):
 
-        # any field has is_bad=True/corrected=False
+        """
+        Selects all objects on the model that have had one of their fields flagged as being incorrect. Only returns
+        objects that have not been corrected.
+        :return: A QuerySet of all objects that require correction
+        """
+
         df = pd.DataFrame.from_records(
             self.flagged_for_verification().values(
                 "pk",
@@ -71,7 +97,11 @@ class VerifiedModelManager(BasicExtendedManager):
 
     def all_fields_good_or_corrected(self):
 
-        # all fields are is_good=True or have been corrected
+        """
+        Selects all objects on the model that have had all of their fields verified and/or corrected.
+        :return: A QuerySet of all objects that have been fully verified (and corrected as needed)
+        """
+
         df = pd.DataFrame.from_records(
             self.flagged_for_verification().values(
                 "pk",
@@ -100,7 +130,13 @@ class VerifiedModelManager(BasicExtendedManager):
 
     def get_verification_table(self):
 
-        objects = pd.DataFrame.from_records(self.values())
+        """
+        Produces a Pandas DataFrame of all of field values of all of the objects that were flagged for verification
+        on the model, along with any verifications or corrections that have been made to those fields.
+        :return: Pandas DataFrame
+        """
+
+        objects = pd.DataFrame.from_records(self.flagged_for_verification().values())
         verifications = pd.DataFrame.from_records(
             get_model("Verification", app_name="django_verifications")
             .objects.filter_by_model_name(
@@ -112,8 +148,7 @@ class VerifiedModelManager(BasicExtendedManager):
         for field in verifications["field"].unique():
             vers = verifications.loc[verifications["field"] == field]
             del vers["id"]
-            objs = objects.loc[objects["id"].isin(vers["object_id"])]
-            objs = objs[["id", field]]
+            objs = objects[["id", field]]
             objs = objs.merge(vers, how="left", left_on="id", right_on="object_id")
             objs = objs[
                 ["id", field, "user_id", "timestamp", "is_good", "notes", "corrected"]
@@ -123,7 +158,18 @@ class VerifiedModelManager(BasicExtendedManager):
 
 
 class VerificationManager(BasicExtendedManager):
+
+    """
+    A custom manager for the `Verification` model, allowing you to filter verifications by the model to be corrected,
+    along with other utility functions.
+    """
+
     def available_model_names(self):
+
+        """
+        Gets the names of the models that have relations to the `Verification` model.
+        :return: List of all of the model names, which correspond to the `related_name` on the `Verification` model.
+        """
 
         verification_model_names = []
         for app, model_list in apps.all_models.items():
@@ -135,29 +181,66 @@ class VerificationManager(BasicExtendedManager):
 
     def filter_by_model_name(self, model_name):
 
+        """
+        Filters verifications down to those related to a specific model.
+        :param model_name: Name of the related model
+        :return: A QuerySet of all verifications related to objects on a specific model
+        """
+
         return self.filter(**{"{}__isnull".format(model_name): False})
 
     def flagged_for_verification(self, model_name):
+
+        """
+        Selects objects from a related model that have been flagged for verification
+        :param model_name: Name of the related model
+        :return: A QuerySet of objects on the related model that have been flagged for verification
+        """
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
         return model.objects.flagged_for_verification()
 
     def has_unexamined_fields(self, model_name):
 
+        """
+        Selects objects from a related model that have one or more fields that still need to be examined.
+        :param model_name: Name of the related model
+        :return: A QuerySet of objects on the related model that haven't been fully examined
+        """
+
         model = get_model(model_name, app_name=settings.SITE_NAME)
         return model.objects.has_unexamined_fields()
 
     def all_fields_examined(self, model_name):
+
+        """
+        Selects objects from a related model that have had all of their fields examined.
+        :param model_name: Name of the related model
+        :return: A QuerySet of objects on the related model that have had all of their fields examined
+        """
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
         return model.objects.all_fields_examined()
 
     def any_field_incorrect(self, model_name):
 
+        """
+        Selects objects from a related model that have had one or more fields examined and marked as incorrect.
+        :param model_name: Name of the related model
+        :return: A QuerySet of objects with fields that have been marked as incorrect
+        """
+
         model = get_model(model_name, app_name=settings.SITE_NAME)
         return model.objects.any_field_incorrect()
 
     def all_fields_good_or_corrected(self, model_name):
+
+        """
+        Selects objects from a related model that have had all of their fields examined, verified, and corrected as
+        needed.
+        :param model_name: Name of the related model
+        :return: A QuerySet of objects that have had all of their fields verified and/or corrected
+        """
 
         model = get_model(model_name, app_name=settings.SITE_NAME)
         return model.objects.all_fields_good_or_corrected()
