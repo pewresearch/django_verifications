@@ -44,7 +44,6 @@ class BaseTests(DjangoTestCase):
         from django.contrib.auth import get_user_model
 
         model_name = Verification.objects.available_model_names()[0]
-        model_name = model_name.replace(" ", "_")
         self.assertEqual(model_name, "movie_review")
 
         for query, value in [
