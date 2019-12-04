@@ -21,8 +21,9 @@ mca>=1.0.3
 nilsimsa>=0.3.8
 nltk>=3.2.2
 numpy<1.17.0; python_version < '3.0'
-numpy>=1.16.0; python_version > '3.0'
-pandas>=0.19.2
+numpy>=1.16.0; python_version >= '3.0'
+pandas<0.25.0; python_version < '3.0'
+pandas>=0.25.0; python_version >= '3.0'
 polyglot
 psycopg2
 python-dateutil>=2.6.0
