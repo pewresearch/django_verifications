@@ -117,7 +117,7 @@ class Verification(BasicExtendedModel):
         User, on_delete=models.CASCADE, related_name="verifications"
     )
     timestamp = models.DateTimeField(auto_now_add=True)
-    is_good = models.NullBooleanField(null=True)
+    is_good = models.BooleanField(null=True)
     notes = models.TextField(null=True)
     corrected = models.BooleanField(default=False)
 
