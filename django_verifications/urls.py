@@ -12,6 +12,8 @@ urlpatterns = [
         views.set_as_incorrect,
         name="set_as_incorrect",
     ),
-    re_path(r"^correct/(?P<model_name>.+)/(?P<pk>[0-9]+)$", views.correct, name="correct"),
+    re_path(
+        r"^correct/(?P<model_name>.+)/(?P<pk>[0-9]+)$", views.correct, name="correct"
+    ),
     re_path(r"^correct/(?P<model_name>.+)$", views.correct, name="correct"),
 ]
