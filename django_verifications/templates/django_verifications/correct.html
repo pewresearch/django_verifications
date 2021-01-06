@@ -19,7 +19,7 @@
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-body" style="overflow: scroll; height: 450px;">
-                        {% for k, v in verification_metadata.iteritems %}
+                        {% for k, v in verification_metadata.items %}
                             <p><b>{{ k }}:</b> {{ v|safe }}</p>
                         {% endfor %}
                     </div>
