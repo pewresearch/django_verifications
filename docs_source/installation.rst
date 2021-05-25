@@ -6,14 +6,14 @@ To install, you can use ``pip``:
 
     .. code-block:: bash
 
-        pip install git+https://github.com/pewresearch/pewanalytics#egg=pewanalytics
+        pip install git+https://github.com/pewresearch/django_verifications#egg=django_verifications
 
 Or you can install from source:
 
     .. code-block:: bash
 
-        git clone https://github.com/pewresearch/pewanalytics.git
-        cd pewanalytics
+        git clone https://github.com/pewresearch/django_verifications.git
+        cd django_verifications
         python setup.py install
 
 .. note::
