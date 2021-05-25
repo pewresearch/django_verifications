@@ -1,5 +1,6 @@
+*************************************
 Getting Started
----------------
+*************************************
 
 Configuring Your Models
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -11,9 +12,15 @@ how to treat your table.
 
 - `fields_to_verify`: This should be a list, with the names of all of the fields that you want to verify as correct.
 - `verification_filters`: This is a list of dictionaries, that are used as keyword arguments to a Django QuerySet filter.
+
 This allows you to narrow the scope of rows in your table that you want to verify.  For example, in our Facebook account
 verification project, we had a lot of other accounts in the database that we were less concerned with - we only wanted
-to verify politician accounts.  So we added a special filter to this list: `{"politician__isnull": False}`
+to verify politician accounts.  So we added a special filter to this list:
+
+.. code-block:: python
+
+    class Meta:
+        verification_filters = [{"politician__isnull": False}]
 
 `VerifiedModel` instances also have a `get_verification_metadata()` function that, by default, returns all of the
 values on the model for each object to be verified. These values are displayed in the coding interface to assist you in
@@ -29,8 +36,8 @@ All of this comes together like so:
     class FacebookProfile(VerifiedModel):
 
         page_name = models.CharField(max_length=200)
-        document = models.OneToOneField("django_learning.Document", related_name="facebook_post", null=True)
-        politician = models.ForeignKey("my_models.Politician", related_name="facebook_profiles", null=True)
+        description = models.TextField(null=True)
+        politician = models.ForeignKey("Politician", related_name="facebook_profiles", null=True)
 
         class Meta:
 
@@ -39,15 +46,15 @@ All of this comes together like so:
 
         def get_verification_metadata(self):
             return {
-                "page": self.page_name,
-                "text": self.document.text,
+                "page_name": self.page_name,
+                "description": self.description,
                 "politician": self.politician.name
             }
 
 
 It's not a great example, but in this `VerifiedModel`, we've specified that we want to verify all Facebook profiles
 that are associated with a politician, and we want to confirm that the `politician` in the database correctly matches
-the page's name and description. We've stored the page's description and other text in a `django_learning` Document,
+the page's name and description. We've stored the page's description in a `TextField`,
 and we'll show that text alongside the name of the profile.  When we go through and verify these profiles, we'll
 be able to see this text, the name of the page, and the name of the politician it's linked to in the database, and
 flag whether or not the page has the correct politician.
@@ -56,8 +63,9 @@ Once you've set up all of the models you want to verify by inheriting from `Veri
 and run migrations:
 
 .. code-block:: bash
-    $ python manage.py makemigrations
-    $ python manage.py migrate
+
+    python manage.py makemigrations
+    python manage.py migrate
 
 Managers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -75,4 +83,14 @@ VerifiedFieldLock
 
 Once a field on your model has been verified or corrected, the value is locked. All `VerifiedModel` instances have a
 modified save function that checks an objects related verifications and any attempt to modify a value that has been
-marked as correct will raise a `VerifiedFieldLock`.
+marked as correct will raise a `VerifiedFieldLock` exception.
+
+User management
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Right now, Django Verifications just uses Django's default user management system. If you have basic auth enabled,
+it should work seamlessly.
+
+.. warning::
+    There is not currently any support for more sophisticated user management. All users in your app will be
+    able to access the verification interface and complete any verification or correction assignments.

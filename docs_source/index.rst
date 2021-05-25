@@ -17,9 +17,8 @@ has a lot of moving parts, and maintaining data accuracy is of the utmost import
    Installation <installation>
    Getting Started <getting_started>
    User interface <user_interface>
-   Models <models>
-   Managers <managers>
-   Views <views>
+   Manager functions <managers>
+   Model functions <models>
 
 
 
