@@ -1,16 +1,20 @@
+*************************************
 Installation
----------------
+*************************************
 
 To install, you can use ``pip``:
 
-    pip install git+https://github.com/pewresearch/pewanalytics#egg=pewanalytics
+    .. code-block:: bash
+
+        pip install git+https://github.com/pewresearch/pewanalytics#egg=pewanalytics
 
 Or you can install from source:
 
-    git clone https://github.com/pewresearch/pewanalytics.git
-    cd pewanalytics
-    python setup.py install
+    .. code-block:: bash
 
+        git clone https://github.com/pewresearch/pewanalytics.git
+        cd pewanalytics
+        python setup.py install
 
 .. note::
     This is a Python 3 package. Though it is compatible with Python 2, many of its dependencies are \
@@ -77,8 +81,8 @@ django_verifications requires:
 
 - Python (>= 2.7)
 - Django (>= 1.10)
-- [Pewtils (our own in-house Python utilities)](https://github.com/pewresearch/pewtils)
-- [Django Pewtils (our own in-house Django utilities)](https://github.com/pewresearch/django_pewtils)
+- `Pewtils (our own in-house Python utilities) <https://github.com/pewresearch/pewtils>`_
+- `Django Pewtils (our own in-house Django utilities) <https://github.com/pewresearch/django_pewtils>`_
 
 You'll need to install Pewtils and Django Pewtils in order for Django Verifications to work, but other than that,
 there are no special requirements.
