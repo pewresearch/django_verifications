@@ -13,7 +13,7 @@ with open("requirements.txt") as reqs:
 
 setup(
     name="django_verifications",
-    version='0.2.5.dev1',
+    version='0.2.5',
     description="Lightweight coding interface to manually review and freeze various model attributes using simple metadata toggles",
     long_description=readme,
     url="https://github.com/pewresearch/django_verifications",
