@@ -1,9 +1,9 @@
+import os
 from distutils.core import setup
 from setuptools import find_packages
 
-
-with open("README.md") as README:
-    readme = str(README.read())
+with open(os.path.join(os.path.dirname(__file__), "README.md"), "rb") as readme:
+    readme = str(readme.read())
 
 install_requires = []
 with open("requirements.txt") as reqs:
@@ -13,7 +13,7 @@ with open("requirements.txt") as reqs:
 
 setup(
     name="django_verifications",
-    version="1.0.0",
+    version='0.2.7.dev0',
     description="Lightweight coding interface to manually review and freeze various model attributes using simple metadata toggles",
     long_description=readme,
     url="https://github.com/pewresearch/django_verifications",
