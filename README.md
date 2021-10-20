@@ -13,13 +13,13 @@ has a lot of moving parts, and maintaining data accuracy is of the utmost import
 
 To install, you can use `pip`:
 
-    pip install git+https://github.com/pewresearch/django_verifications#egg=django_verifications
+    pip install django_verifications
 
 Or you can install from source:
 
     git clone https://github.com/pewresearch/django_verifications.git
     cd django_verifications
-    python setup.py install
+    pip install -e .
 
 ### Installation Troubleshooting
  
