@@ -22,7 +22,7 @@ Or you can install from source:
     pip install -e .
 
 ### Installation Troubleshooting
- 
+
 #### Using 64-bit Python
 
 Some of our libraries require the use of 64-bit Python. If you encounter errors during installation \
@@ -49,7 +49,7 @@ Installing ssdeep on Mac OS may involve a few additional steps, detailed below:
     ln -s /usr/local/bin/glibtoolize /usr/local/bin/libtoolize
     ```
 4. Install ssdeep with an additional flag to build the required libraries
-	```
+    ```
     BUILD_LIB=1 pip install ssdeep
     ```
 5. If step 4 fails, you may need to redirect your system to the new libraries by setting the following flags:
@@ -64,7 +64,7 @@ Installing ssdeep on Mac OS may involve a few additional steps, detailed below:
 
 Please refer to the [official documentation](https://pewresearch.github.io/django_verifications/) for information on how to use this package.
 
-## Use Policy 
+## Use Policy
 
 In addition to the [license](https://github.com/pewresearch/django_verifications/blob/master/LICENSE), Users must abide by the following conditions:
 
