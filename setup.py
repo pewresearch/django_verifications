@@ -1,55 +1,46 @@
 import os
-from setuptools import setup, find_packages
-
+from distutils.core import setup
+from setuptools import find_packages
 
 with open(os.path.join(os.path.dirname(__file__), "README.md"), "rb") as readme:
-    README = str(readme.read())
+    readme = str(readme.read())
 
-os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
-
+install_requires = []
 with open("requirements.txt") as reqs:
-    install_requires = [
-        line
-        for line in reqs.read().split("\n")
-        if line and not line.startswith(("--", "git+ssh"))
-    ]
-    dependency_links = [
-        line
-        for line in reqs.read().split("\n")
-        if line and line.startswith(("--", "git+ssh"))
-    ]
+    for line in reqs.read().split("\n"):
+        if not line.startswith("#"):
+            install_requires.append(line)
 
 setup(
     name="django_verifications",
     version='0.2.7.dev0',
     description="Lightweight coding interface to manually review and freeze various model attributes using simple metadata toggles",
-    long_description=README,  # 'http://labs.pewresearch.tech/docs/libs/django_verifications',
+    long_description=readme,
     url="https://github.com/pewresearch/django_verifications",
-    author="Patrick van Kessel, Pew Research Center",
-    author_email="pvankessel@pewresearch.tech",
+    author="Pew Research Center",
+    author_email="info@pewresearch.org",
     install_requires=install_requires,
-    dependency_links=dependency_links,
     packages=find_packages(exclude=["contrib", "docs", "tests"]),
     include_package_data=True,
+    keywords="text processing, data validation, django, pew pew pew",
+    license="GPLv2+",
     classifiers=[
-        "Environment :: Web Environment",
-        "Framework :: Django",
         # https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        #        'Development Status :: 1 - Planning',
-        "Development Status :: 2 - Pre-Alpha",
-        #        'Development Status :: 3 - Alpha',
-        #        'Development Status :: 4 - Beta',
-        #        'Development Status :: 5 - Production/Stable',
-        #        'Development Status :: 6 - Mature',
-        #        'Development Status :: 7 - Inactive'
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
+        "Intended Audience :: Information Technology",
         "Intended Audience :: Developers",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+        "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Utilities",
     ],
-    keywords="pew pew pew",
-    license="MIT",
 )

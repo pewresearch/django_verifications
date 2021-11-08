@@ -9,7 +9,7 @@ spec:
   template:
     spec:
       repository: pewresearch/django_verifications
-      image: 458280294434.dkr.ecr.us-east-1.amazonaws.com/labs-actions-runner@sha256:41a92e6db53febef2db892cea45680d480dce6c8f576367b1245d57f017e7935
+      image: 458280294434.dkr.ecr.us-east-1.amazonaws.com/labs-actions-runner@sha256:7aff25a73408c9a1d3e04f5e8a4ef476058e80eca58af5e50a7fefa8382ce0e5
       imagePullPolicy: Always
       serviceAccountName: labs-runner
       labels:
@@ -21,7 +21,7 @@ spec:
           memory: "8Gi"
 
         requests:
-          cpu: "1.0"
+          cpu: "100m"
           memory: "2Gi"
 
       env:

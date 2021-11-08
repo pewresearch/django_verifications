@@ -11,96 +11,85 @@ has a lot of moving parts, and maintaining data accuracy is of the utmost import
 
 ## Installation
 
-### Dependencies
+To install, you can use `pip`:
 
-django_verifications requires:
+    pip install django_verifications
 
-- Python (>= 2.7)
-- Django (>= 1.10)
-- [Pewtils (our own in-house Python utilities)](https://github.com/pewresearch/pewtils)
-- [Django Pewtils (our own in-house Django utilities)](https://github.com/pewresearch/django_pewtils)
+Or you can install from source:
 
-You'll need to install Pewtils and Django Pewtils in order for Django Verifications to work, but other than that,
-there are no special requirements.
+    git clone https://github.com/pewresearch/django_verifications.git
+    cd django_verifications
+    pip install -e .
 
-### Configuring Your Models
+### Installation Troubleshooting
 
-All you need to do to use django_verifications is make sure that your models inherit from
-`django_verifications.VerifiedModel` instead of the traditional `django.db.models.Model` class, and it will take
-care of the rest.  Django Verifications then requires you to specify two special `Meta` variables, so it knows
-how to treat your table.
+#### Using 64-bit Python
 
-- `fields_to_verify`: This should be a list, with the names of all of the fields that you want to verify as correct.
-- `verification_filters`: This is a list of dictionaries, that are used as keyword arguments to a Django QuerySet filter.
-This allows you to narrow the scope of rows in your table that you want to verify.  For example, in our Facebook account
-verification project, we had a lot of other accounts in the database that we were less concerned with - we only wanted
-to verify politician accounts.  So we added a special filter to this list: `{"politician__isnull": False}`
+Some of our libraries require the use of 64-bit Python. If you encounter errors during installation \
+that are related to missing libraries, you may be using 32-bit Python. We recommend that you uninstall \
+this version and switch to a 64-bit version instead. On Windows, these will be marked with `x86-64`; you \
+can find the latest 64-bit versions of Python [here](https://www.python.org/downloads).
 
-`VerifiedModel` instances also have a `get_verification_metadata()` function that, by default, returns all of the 
-values on the model for each object to be verified. These values are displayed in the coding interface to assist you in 
-determining whether fields are correct or not. You can overwrite this function to return any dictionary of values 
-you desire. 
+#### Installing ssdeep
 
-All of this comes together like so:
+ssdeep is an optional dependency that can be used by the `get_hash` function in Pewtils. \
+Installation instructions for various Linux distributions can be found in the library's \
+[documentation](https://python-ssdeep.readthedocs.io/en/latest/installation.html). The ssdeep \
+Python library is not currently compatible with Windows. \
+Installing ssdeep on Mac OS may involve a few additional steps, detailed below:
 
-```python
+1. Install Homebrew
+2. Install xcode
+    ```
+    xcode-select --install
+    ```
+3. Install system dependencies
+    ```
+    brew install pkg-config libffi libtool automake
+    ln -s /usr/local/bin/glibtoolize /usr/local/bin/libtoolize
+    ```
+4. Install ssdeep with an additional flag to build the required libraries
+    ```
+    BUILD_LIB=1 pip install ssdeep
+    ```
+5. If step 4 fails, you may need to redirect your system to the new libraries by setting the following flags:
+    ```
+    export LIBTOOL=`which glibtool`
+    export LIBTOOLIZE=`which glibtoolize`
+    ```
+   Do this and try step 4 again.
+6. Now you should be able to run the main installation process detailed above.
 
-from django_verifications.models import VerifiedModel
+## Documentation
 
-class FacebookProfile(VerifiedModel):
+Please refer to the [official documentation](https://pewresearch.github.io/django_verifications/) for information on how to use this package.
 
-    page_name = models.CharField(max_length=200)
-    document = models.OneToOneField("django_learning.Document", related_name="facebook_post", null=True)
-    politician = models.ForeignKey("my_models.Politician", related_name="facebook_profiles", null=True)
-    
-    class Meta:
+## Use Policy
 
-        fields_to_verify = ["politician"]
-        verification_filters = [{"politician__isnull": False}]
-        
-    def get_verification_metadata(self):
-        return {
-            "page": self.page_name,
-            "text": self.document.text,
-            "politician": self.politician.name
-        }
+In addition to the [license](https://github.com/pewresearch/django_verifications/blob/master/LICENSE), Users must abide by the following conditions:
 
-```
+- User may not use the Center's logo
+- User may not use the Center's name in any advertising, marketing or promotional materials.
+- User may not use the licensed materials in any manner that implies, suggests, or could otherwise be perceived as attributing a particular policy or lobbying objective or opinion to the Center, or as a Center endorsement of a cause, candidate, issue, party, product, business, organization, religion or viewpoint.
 
-It's not a great example, but in this `VerifiedModel`, we've specified that we want to verify all Facebook profiles 
-that are associated with a politician, and we want to confirm that the `politician` in the database correctly matches 
-the page's name and description. We've stored the page's description and other text in a `django_learning` Document, 
-and we'll show that text alongside the name of the profile.  When we go through and verify these profiles, we'll 
-be able to see this text, the name of the page, and the name of the politician it's linked to in the database, and 
-flag whether or not the page has the correct politician.
+## Issues and Pull Requests
 
-Once you've set up all of the models you want to verify by inheriting from `VerifiedModel`, you'll need to make
-and run migrations:
+This code is provided as-is for use in your own projects. You are free to submit issues and pull requests with any questions or suggestions you may have. We will do our best to respond within a 30-day time period.
 
-```
-$ python manage.py makemigrations
-$ python manage.py migrate
-```
+## Recommended Package Citation
 
-### Using the interface
+Pew Research Center, 2021, "django_verifications" Available at: github.com/pewresearch/django_verifications
 
-Django Verifications provides templates and views for an interface, allowing you to easily verify all of the fields 
-on any objects in your database, and make corrections to those values as needed. To access the interface, 
-you just need to import the URLs specified in `django_verifications.urls` and navigate to the Django Verifications 
-home page. 
+## Acknowledgements
 
-### Managers
+The following authors contributed to this repository:
 
-Any models that inherit from `VerifiedModel` will be given an extended `VerifiedModelManager` manager that overwrites 
-the normal `objects` attribute on the model. This manager provides a variety of helper functions for accessing and 
-filtering the objects on your model based on their verification status. Examples include `flagged_for_verification`, 
-which returns a QuerySet of all of the objects on your model that have been flagged for verification based on the 
-`verification_filters` metadata attribute, and `all_fields_good_or_corrected`, which returns all of the objects on your 
-model that have had all of their verifiable fields (specified in `fields_to_verify`) examined, verified, and/or 
-corrected.
+- Patrick van Kessel
 
-### VerifiedFieldLock
+## About Pew Research Center
 
-Once a field on your model has been verified or corrected, the value is locked. All `VerifiedModel` instances have a 
-modified save function that checks an objects related verifications and any attempt to modify a value that has been 
-marked as correct will raise a `VerifiedFieldLock`.
+Pew Research Center is a nonpartisan fact tank that informs the public about the issues, attitudes and trends shaping the world. It does not take policy positions. The Center conducts public opinion polling, demographic research, content analysis and other data-driven social science research. It studies U.S. politics and policy; journalism and media; internet, science and technology; religion and public life; Hispanic trends; global attitudes and trends; and U.S. social and demographic trends. All of the Center's reports are available at [www.pewresearch.org](http://www.pewresearch.org). Pew Research Center is a subsidiary of The Pew Charitable Trusts, its primary funder.
+
+## Contact
+
+For all inquiries, please email info@pewresearch.org. Please be sure to specify your deadline, and we will get back to you as soon as possible. This email account is monitored regularly by Pew Research Center Communications staff.
