@@ -1,9 +1,9 @@
+import os
 from distutils.core import setup
 from setuptools import find_packages
 
-
-with open("README.md") as README:
-    readme = str(README.read())
+with open(os.path.join(os.path.dirname(__file__), "README.md"), "rb") as readme:
+    readme = str(readme.read())
 
 install_requires = []
 with open("requirements.txt") as reqs:
