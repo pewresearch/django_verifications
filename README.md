@@ -1,13 +1,19 @@
 # Django Verifications
 
-Django Verifications is a lightweight coding interface to manually review and freeze various model attributes
-using simple metadata toggles.  By specifying models as a `VerifiedModel` with the proper model metadata,
-Django Verifications will expose a web interface for reviewing and confirming object attributes in your app.
-For example, we found this to come in handy for reviewing and confirming the Facebook accounts of US congress members.
-After loading in accounts from a variety of sources - many of which had errors - Django Verifications allowed us to
-review each account manually and confirm that it was associated with the correct politician.  Once an account has been
-verified, Django Verifications yells at you if you try to change that value - which can be very useful when your app
-has a lot of moving parts, and maintaining data accuracy is of the utmost importance.
+Django Verifications is a lightweight coding interface to manually
+review and freeze various model attributes using simple metadata
+toggles. By specifying models as a `VerifiedModel` with the proper
+model metadata, Django Verifications will expose a web interface for
+reviewing and confirming object attributes in your app. For example,
+we found this to come in handy for reviewing and confirming the
+Facebook accounts of US congress members. After loading in accounts
+from a variety of sources - many of which had errors - Django
+Verifications allowed us to review each account manually and confirm
+that it was associated with the correct politician. Once an account
+has been verified, Django Verifications yells at you if you try to
+change that value - which can be very useful when your app has a lot
+of moving parts, and maintaining data accuracy is of the utmost
+importance.
 
 ## Installation
 
@@ -25,18 +31,22 @@ Or you can install from source:
 
 #### Using 64-bit Python
 
-Some of our libraries require the use of 64-bit Python. If you encounter errors during installation \
-that are related to missing libraries, you may be using 32-bit Python. We recommend that you uninstall \
-this version and switch to a 64-bit version instead. On Windows, these will be marked with `x86-64`; you \
-can find the latest 64-bit versions of Python [here](https://www.python.org/downloads).
+Some of our libraries require the use of 64-bit Python. If you
+encounter errors during installation that are related to missing
+libraries, you may be using 32-bit Python. We recommend that you
+uninstall this version and switch to a 64-bit version instead. On
+Windows, these will be marked with `x86-64`; you can find the latest
+64-bit versions of Python [here](https://www.python.org/downloads).
 
 #### Installing ssdeep
 
-ssdeep is an optional dependency that can be used by the `get_hash` function in Pewtils. \
-Installation instructions for various Linux distributions can be found in the library's \
-[documentation](https://python-ssdeep.readthedocs.io/en/latest/installation.html). The ssdeep \
-Python library is not currently compatible with Windows. \
-Installing ssdeep on Mac OS may involve a few additional steps, detailed below:
+ssdeep is an optional dependency that can be used by the `get_hash`
+function in Pewtils. Installation instructions for various Linux
+distributions can be found in the library's
+[documentation](https://python-ssdeep.readthedocs.io/en/latest/installation.html).
+The ssdeep Python library is not currently compatible with Windows.
+Installing ssdeep on Mac OS may involve a few additional steps,
+detailed below:
 
 1. Install Homebrew
 2. Install xcode
@@ -62,23 +72,35 @@ Installing ssdeep on Mac OS may involve a few additional steps, detailed below:
 
 ## Documentation
 
-Please refer to the [official documentation](https://pewresearch.github.io/django_verifications/) for information on how to use this package.
+Please refer to the [official
+documentation](https://pewresearch.github.io/django_verifications/)
+for information on how to use this package.
 
 ## Use Policy
 
-In addition to the [license](https://github.com/pewresearch/django_verifications/blob/master/LICENSE), Users must abide by the following conditions:
+In addition to the
+[license](https://github.com/pewresearch/django_verifications/blob/master/LICENSE),
+Users must abide by the following conditions:
 
 - User may not use the Center's logo
 - User may not use the Center's name in any advertising, marketing or promotional materials.
-- User may not use the licensed materials in any manner that implies, suggests, or could otherwise be perceived as attributing a particular policy or lobbying objective or opinion to the Center, or as a Center endorsement of a cause, candidate, issue, party, product, business, organization, religion or viewpoint.
+- User may not use the licensed materials in any manner that implies,
+  suggests, or could otherwise be perceived as attributing a
+  particular policy or lobbying objective or opinion to the Center, or
+  as a Center endorsement of a cause, candidate, issue, party,
+  product, business, organization, religion or viewpoint.
 
 ## Issues and Pull Requests
 
-This code is provided as-is for use in your own projects. You are free to submit issues and pull requests with any questions or suggestions you may have. We will do our best to respond within a 30-day time period.
+This code is provided as-is for use in your own projects. You are free
+to submit issues and pull requests with any questions or suggestions
+you may have. We will do our best to respond within a 30-day time
+period.
 
 ## Recommended Package Citation
 
-Pew Research Center, 2021, "django_verifications" Available at: github.com/pewresearch/django_verifications
+Pew Research Center, 2021, "django_verifications" Available at:
+github.com/pewresearch/django_verifications 
 
 ## Acknowledgements
 
@@ -88,8 +110,21 @@ The following authors contributed to this repository:
 
 ## About Pew Research Center
 
-Pew Research Center is a nonpartisan fact tank that informs the public about the issues, attitudes and trends shaping the world. It does not take policy positions. The Center conducts public opinion polling, demographic research, content analysis and other data-driven social science research. It studies U.S. politics and policy; journalism and media; internet, science and technology; religion and public life; Hispanic trends; global attitudes and trends; and U.S. social and demographic trends. All of the Center's reports are available at [www.pewresearch.org](http://www.pewresearch.org). Pew Research Center is a subsidiary of The Pew Charitable Trusts, its primary funder.
+Pew Research Center is a nonpartisan fact tank that informs the public
+about the issues, attitudes and trends shaping the world. It does not
+take policy positions. The Center conducts public opinion polling,
+demographic research, content analysis and other data-driven social
+science research. It studies U.S. politics and policy; journalism and
+media; internet, science and technology; religion and public life;
+Hispanic trends; global attitudes and trends; and U.S. social and
+demographic trends. All of the Center's reports are available at
+[www.pewresearch.org](http://www.pewresearch.org). Pew Research Center
+is a subsidiary of The Pew Charitable Trusts, its primary funder.
 
 ## Contact
 
-For all inquiries, please email info@pewresearch.org. Please be sure to specify your deadline, and we will get back to you as soon as possible. This email account is monitored regularly by Pew Research Center Communications staff.
+For all inquiries, please email
+[info@pewresearch.org](mailto:info@pewresearch.org). Please be sure to
+specify your deadline, and we will get back to you as soon as
+possible. This email account is monitored regularly by Pew Research
+Center Communications staff.
