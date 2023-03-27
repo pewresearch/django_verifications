@@ -38,18 +38,18 @@ uninstall this version and switch to a 64-bit version instead. On
 Windows, these will be marked with `x86-64`; you can find the latest
 64-bit versions of Python [here](https://www.python.org/downloads).
 
-#### Installing ssdeep
+#### Installing `ssdeep`
 
-ssdeep is an optional dependency that can be used by the `get_hash`
-function in Pewtils. Installation instructions for various Linux
+`ssdeep` is an optional dependency that can be used by the `get_hash`
+function in `pewtils`. Installation instructions for various Linux
 distributions can be found in the library's
 [documentation](https://python-ssdeep.readthedocs.io/en/latest/installation.html).
-The ssdeep Python library is not currently compatible with Windows.
-Installing ssdeep on Mac OS may involve a few additional steps,
+The `ssdeep` Python library is not currently compatible with Windows.
+Installing `ssdeep` on Mac OS may involve a few additional steps,
 detailed below:
 
 1. Install Homebrew
-2. Install xcode
+2. Install XCode
     ```
     xcode-select --install
     ```
@@ -58,7 +58,7 @@ detailed below:
     brew install pkg-config libffi libtool automake
     ln -s /usr/local/bin/glibtoolize /usr/local/bin/libtoolize
     ```
-4. Install ssdeep with an additional flag to build the required libraries
+4. Install `ssdeep` with an additional flag to build the required libraries
     ```
     BUILD_LIB=1 pip install ssdeep
     ```
@@ -72,9 +72,8 @@ detailed below:
 
 ## Documentation
 
-Please refer to the [official
-documentation](https://pewresearch.github.io/django_verifications/)
-for information on how to use this package.
+Please refer to the documentation included in this repository for
+information on how to use this package.
 
 ## Use Policy
 
