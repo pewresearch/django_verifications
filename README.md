@@ -89,13 +89,6 @@ Users must abide by the following conditions:
   as a Center endorsement of a cause, candidate, issue, party,
   product, business, organization, religion or viewpoint.
 
-## Issues and Pull Requests
-
-This code is provided as-is for use in your own projects. You are free
-to submit issues and pull requests with any questions or suggestions
-you may have. We will do our best to respond within a 30-day time
-period.
-
 ## Recommended Package Citation
 
 Pew Research Center, 2021, "django_verifications" Available at:
